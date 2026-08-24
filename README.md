@@ -1,6 +1,6 @@
-# BE-SURE Program
+# AE Research Scholars
 
-**Building Engineering — Seminal Undergraduate Research Experience**
+**Architectural Engineering Undergraduate Research**
 
 Matches undergraduate students with AE faculty for paid research positions ($15/hr, ~5-10 hrs/week).
 

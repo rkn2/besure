@@ -295,11 +295,11 @@ def admin_emails():
             ).fetchall()
             label = OPTION_LABELS.get(c["option_name"], c["option_name"])
             to_names = ", ".join(f["name"] for f in faculty_in_option)
-            subject = f"BE-SURE {semester}: Students Interested in {label}"
+            subject = f"AE Research Scholars {semester}: Students Interested in {label}"
             body = (
                 f"Dear {label} faculty,\n\n"
                 f"The following {len(students)} student(s) have expressed high interest "
-                f"in {label.lower()} research through the BE-SURE program this semester.\n\n"
+                f"in {label.lower()} research through the AE Research Scholars program this semester.\n\n"
                 f"You can view their profiles and resumes here:\n"
                 f"{{{{ cohort_url }}}}\n\n"
             )
@@ -331,10 +331,10 @@ def admin_emails():
             if not fac:
                 continue
             student_names = ", ".join(s["name"] for s in students)
-            subject = f"BE-SURE {semester}: Student(s) Interested in Working With You"
+            subject = f"AE Research Scholars {semester}: Student(s) Interested in Working With You"
             body = (
                 f"Dear {fac['name'].split()[0]},\n\n"
-                f"The following BE-SURE student(s) specifically expressed interest in working "
+                f"The following AE Research Scholars student(s) specifically expressed interest in working "
                 f"with you this semester:\n\n"
             )
             for s in students:
@@ -601,12 +601,12 @@ def view_cohort(slug):
 
     title = ""
     if cohort["page_type"] == "option":
-        title = f"BE-SURE — {OPTION_LABELS.get(cohort['option_name'], '')} Students"
+        title = f"AE Research Scholars — {OPTION_LABELS.get(cohort['option_name'], '')} Students"
     elif cohort["page_type"] == "faculty":
         fac = conn.execute(
             "SELECT name FROM faculty WHERE id = ?", (cohort["faculty_id"],)
         ).fetchone()
-        title = f"BE-SURE — Students for {fac['name']}" if fac else "BE-SURE Students"
+        title = f"AE Research Scholars — Students for {fac['name']}" if fac else "AE Research Scholars Students"
 
     conn.close()
     return render_template(

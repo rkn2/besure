@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Payroll Email — BE-SURE Admin{% endblock %}
+{% block title %}Payroll Email — AE Research Scholars Admin{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -8,11 +8,11 @@
     <h1 style="margin-bottom: 1rem;">Payroll Email for {{ student.name }}</h1>
 
     <div class="email-preview">
-        <div class="email-subject">Subject: New BE-SURE Student Researcher Payroll Information</div>
+        <div class="email-subject">Subject: New AE Research Scholars Student Researcher Payroll Information</div>
         <div class="email-meta"><strong>To:</strong> Michele Kephart</div>
         <div class="email-body">Hi Michele,
 
-This email is to confirm the payroll details for our new BE-SURE student researcher, {{ student.name }}, who I just sent a note to.
+This email is to confirm the payroll details for our new AE Research Scholars student researcher, {{ student.name }}, who I just sent a note to.
 
 Student: {{ student.name }}
 Faculty Mentor/Supervisor: {{ faculty.name }} (They will be responsible for approving their hours).

@@ -181,9 +181,9 @@ def render_cohort_page(title, semester, students, slug, resumes_dir):
     cards = "\n".join(render_student_card(s, slug, resumes_dir) for s in students)
     count = len(students)
     intro = (
-        "This student has expressed interest in working with you through the BE-SURE program."
+        "This student has expressed interest in working with you through the AE Research Scholars program."
         if count == 1 else
-        f"These {count} students have expressed interest in this area through the BE-SURE program."
+        f"These {count} students have expressed interest in this area through the AE Research Scholars program."
     )
 
     return f"""<!DOCTYPE html>
@@ -216,7 +216,7 @@ def render_cohort_page(title, semester, students, slug, resumes_dir):
 </section>
 
 <footer class="site-footer">
-  <p>BE-SURE Program &middot; Department of Architectural Engineering &middot; Penn State</p>
+  <p>AE Research Scholars Program &middot; Department of Architectural Engineering &middot; Penn State</p>
 </footer>
 
 </body>
@@ -248,7 +248,7 @@ def generate(csv_path, semester, resumes_dir):
                 if src and os.path.exists(src):
                     shutil.copy2(src, resume_dest)
 
-        title = f"BE-SURE — {OPTION_LABELS[opt]} Students"
+        title = f"AE Research Scholars — {OPTION_LABELS[opt]} Students"
         html = render_cohort_page(title, semester, opt_students, slug, resumes_dir)
         with open(os.path.join(page_dir, "index.html"), "w") as f:
             f.write(html)
@@ -273,7 +273,7 @@ def generate(csv_path, semester, resumes_dir):
                 if src and os.path.exists(src):
                     shutil.copy2(src, resume_dest)
 
-        title = f"BE-SURE — Students for {fac_name}"
+        title = f"AE Research Scholars — Students for {fac_name}"
         html = render_cohort_page(title, semester, data["students"], slug, resumes_dir)
         with open(os.path.join(page_dir, "index.html"), "w") as f:
             f.write(html)
@@ -309,11 +309,11 @@ def generate(csv_path, semester, resumes_dir):
                 for s in faculty_specific[fac_name]["students"]
             )
             print(f"--- EMAIL: {fac_name} ---")
-            print(f"Subject: BE-SURE {semester}: Student(s) Interested in Working With You")
+            print(f"Subject: AE Research Scholars {semester}: Student(s) Interested in Working With You")
             print(f"""
 Dear {first_name},
 
-The following BE-SURE student(s) specifically expressed interest in working with you this semester:
+The following AE Research Scholars student(s) specifically expressed interest in working with you this semester:
 
 {students_list}
 
@@ -338,11 +338,11 @@ Doc Nap
 
             print(f"--- EMAIL: {label} faculty ---")
             print(f"To: {', '.join(faculty_in_opt)}")
-            print(f"Subject: BE-SURE {semester}: Students Interested in {label}")
+            print(f"Subject: AE Research Scholars {semester}: Students Interested in {label}")
             print(f"""
 Dear {label} faculty,
 
-The following {count} student(s) have expressed high interest in {label.lower()} research through the BE-SURE program this semester.
+The following {count} student(s) have expressed high interest in {label.lower()} research through the AE Research Scholars program this semester.
 
 You can view their profiles and resumes here:
 BASE_URL/view/{slug}/
@@ -360,7 +360,7 @@ Doc Nap
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Generate BE-SURE cohort pages from form submissions")
+    parser = argparse.ArgumentParser(description="Generate AE Research Scholars cohort pages from form submissions")
     parser.add_argument("csv", help="Path to CSV export of form submissions")
     parser.add_argument("--semester", default=None, help="Semester label (default: auto-detect)")
     parser.add_argument("--resumes-dir", default=None, help="Directory containing resume files")
