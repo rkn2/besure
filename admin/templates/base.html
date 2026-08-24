@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% block meta %}{% endblock %}
+    <title>{% block title %}BE-SURE{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    {% block header %}
+    <header class="site-header">
+        <div class="header-inner">
+            <div>
+                <h1><a href="/">BE-SURE Program</a></h1>
+                <div class="subtitle">Building Engineering &mdash; Seminal Undergraduate Research Experience</div>
+            </div>
+            {% if session.get('admin') %}
+            <nav class="header-nav">
+                <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('admin_applications') }}">Applications</a>
+                <a href="{{ url_for('admin_match') }}">Match</a>
+                <a href="{{ url_for('admin_placements') }}">Placements</a>
+                <a href="{{ url_for('admin_faculty') }}">Faculty</a>
+                <a href="{{ url_for('admin_logout') }}">Logout</a>
+            </nav>
+            {% endif %}
+        </div>
+    </header>
+    {% endblock %}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="container">
+        {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+</body>
+</html>

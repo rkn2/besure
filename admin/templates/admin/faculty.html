@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Faculty — BE-SURE Admin{% endblock %}
+
+{% block content %}
+<div class="container-wide">
+    <h1 style="margin-bottom: 1rem;">Faculty Roster</h1>
+
+    <div class="card">
+        <h2>Current Faculty</h2>
+        <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>Name</th><th>Email</th><th>Options</th><th>Research</th><th></th></tr>
+            </thead>
+            <tbody>
+                {% for f in faculty %}
+                <tr>
+                    <td>{{ f.name }}</td>
+                    <td>{{ f.email or '—' }}</td>
+                    <td>
+                        {% for opt in faculty_opts.get(f.id, []) %}
+                        <span class="badge badge-high">{{ option_labels.get(opt, opt) }}</span>
+                        {% endfor %}
+                    </td>
+                    <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ f.research_summary or '' }}</td>
+                    <td>
+                        <form method="post" action="{{ url_for('delete_faculty', fac_id=f.id) }}" style="display:inline;"
+                              onsubmit="return confirm('Remove {{ f.name }}?')">
+                            <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Add Faculty</h2>
+        <form method="post" action="{{ url_for('add_faculty') }}">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="required">Name</label>
+                    <input type="text" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Research Summary</label>
+                <input type="text" name="research">
+            </div>
+            <div class="form-group">
+                <label>Options</label>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    {% for opt, label in option_labels.items() %}
+                    <label style="font-weight: 400; display: flex; align-items: center; gap: 0.3rem;">
+                        <input type="checkbox" name="options" value="{{ opt }}"> {{ label }}
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Faculty</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

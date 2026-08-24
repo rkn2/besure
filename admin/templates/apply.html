@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Apply — BE-SURE Program{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <h2>BE-SURE Student Application</h2>
+        <p style="margin-bottom:1.5rem; color: var(--text-muted); font-size: 0.9rem;">
+            Interested in undergraduate research in Architectural Engineering?
+            Fill out this form and we'll work to connect you with a faculty mentor.
+        </p>
+
+        <form method="post" action="{{ url_for('apply_submit') }}" enctype="multipart/form-data">
+            <div class="form-section">
+                <h2>Your Information</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="required" for="name">Full name</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="required" for="email">Email address</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="graduation_year">Expected graduation year</label>
+                        <input type="text" id="graduation_year" name="graduation_year" placeholder="e.g. 2027">
+                    </div>
+                    <div class="form-group">
+                        <label for="major">Major</label>
+                        <input type="text" id="major" name="major" placeholder="e.g. Architectural Engineering">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="citizenship">Are you a US citizen or permanent resident?</label>
+                    <div class="help-text">Some funding agencies require this information.</div>
+                    <select id="citizenship" name="citizenship">
+                        <option value="">— Select —</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                        <option value="Prefer not to say">Prefer not to say</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>Research Interests</h2>
+                <p class="help-text" style="margin-bottom: 1rem;">Rate your interest level in each area of Architectural Engineering.</p>
+                <div class="interest-grid">
+                    {% for name, label in [('structures', 'Structures'), ('mechanical', 'Mechanical / Energy'), ('lighting', 'Lighting / Electrical'), ('construction', 'Construction')] %}
+                    <div class="interest-row">
+                        <div class="label">{{ label }}</div>
+                        <div class="interest-options">
+                            {% for val in ['High interest', 'Moderate interest', 'Low interest', 'Not at all'] %}
+                            <label>
+                                <input type="radio" name="interest_{{ name }}" value="{{ val }}">
+                                {{ val }}
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>Additional Information</h2>
+                <div class="form-group">
+                    <label for="additional_interests">What type of research work interests you? (Optional)</label>
+                    <textarea id="additional_interests" name="additional_interests"
+                        placeholder="Describe any specific topics, skills, or types of projects you're interested in..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="faculty_preference">Is there a faculty member you'd like to work with? (Optional)</label>
+                    <div class="help-text">If so, write their name and whether you've talked to them about it.</div>
+                    <textarea id="faculty_preference" name="faculty_preference"
+                        placeholder="e.g. Dr. Brown — I talked with him about structural optimization"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="resume">Upload your resume (PDF, DOC, or DOCX)</label>
+                    <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Submit Application</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

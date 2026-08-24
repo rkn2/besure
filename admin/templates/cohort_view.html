@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block meta %}<meta name="robots" content="noindex, nofollow">{% endblock %}
+
+{% block header %}
+<header class="site-header">
+    <div class="header-inner">
+        <div>
+            <h1>{{ title }}</h1>
+            <div class="subtitle">{{ semester }}</div>
+        </div>
+    </div>
+</header>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <p style="margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.9rem;">
+        {% if students|length == 1 %}
+        This student has expressed interest in working with you through the BE-SURE program.
+        {% else %}
+        These {{ students|length }} students have expressed interest in this area through the BE-SURE program.
+        {% endif %}
+        If you'd like to interview any of them, contact Doc Nap and she'll make the introduction.
+    </p>
+
+    {% for s in students %}
+    <div class="student-card">
+        <h3>{{ s.name }}</h3>
+        <div class="meta">
+            {{ s.email }}
+            {% if s.graduation_year %} &middot; Graduating {{ s.graduation_year }}{% endif %}
+            {% if s.major %} &middot; {{ s.major }}{% endif %}
+        </div>
+
+        <div class="interests">
+            {% for opt, label in option_labels.items() %}
+                {% set col = 'interest_' + opt %}
+                {% if s[col] == 'High interest' %}<span class="badge badge-high">{{ label }}: High</span>
+                {% elif s[col] == 'Moderate interest' %}<span class="badge badge-moderate">{{ label }}: Moderate</span>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        {% if s.additional_interests %}
+        <div class="description">{{ s.additional_interests }}</div>
+        {% endif %}
+
+        {% if s.faculty_preference %}
+        <div class="description" style="color: var(--text-muted); font-style: italic;">
+            Faculty preference: {{ s.faculty_preference }}
+        </div>
+        {% endif %}
+
+        {% if s.resume_filename %}
+        <a href="{{ url_for('view_resume', slug=cohort.slug, student_id=s.id) }}" class="btn btn-secondary btn-sm" target="_blank">
+            View Resume
+        </a>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    {% if not students %}
+    <div class="card">
+        <p style="color: var(--text-muted);">No students in this cohort.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

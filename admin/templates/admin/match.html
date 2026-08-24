@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Matching — BE-SURE Admin{% endblock %}
+
+{% block content %}
+<div class="container-wide">
+    <h1 style="margin-bottom: 1rem;">Matching — {{ semester }}</h1>
+
+    {% if results.unmatched_students %}
+    <div class="warning">
+        <h3>{{ results.unmatched_students|length }} student(s) matched zero cohorts</h3>
+        <p>These students had no "High interest" options and didn't name a known faculty member. They need manual review.</p>
+        <ul style="margin-top: 0.5rem;">
+            {% for s in results.unmatched_students %}
+            <li><a href="{{ url_for('admin_student_detail', student_id=s.id) }}">{{ s.name }}</a> ({{ s.email }})</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if results.unknown_faculty_refs %}
+    <div class="warning">
+        <h3>{{ results.unknown_faculty_refs|length }} student(s) named unrecognized faculty</h3>
+        <p>These students mentioned faculty names that don't match anyone on the roster.</p>
+        <ul style="margin-top: 0.5rem;">
+            {% for ref in results.unknown_faculty_refs %}
+            <li><a href="{{ url_for('admin_student_detail', student_id=ref.student.id) }}">{{ ref.student.name }}</a>
+                — wrote: "{{ ref.raw_text }}"
+                (parsed: {{ ref.names|join(', ') }})
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% for opt, students in results.option_cohorts.items() %}
+    <div class="card">
+        <h2>{{ option_labels[opt] }} — {{ students|length }} student(s)</h2>
+        {% if students %}
+        <div class="table-wrap">
+        <table>
+            <thead><tr><th>Name</th><th>Email</th><th>Faculty Pref</th><th>Additional Interests</th></tr></thead>
+            <tbody>
+                {% for s in students %}
+                <tr>
+                    <td><a href="{{ url_for('admin_student_detail', student_id=s.id) }}">{{ s.name }}</a></td>
+                    <td>{{ s.email }}</td>
+                    <td>{{ s.faculty_preference or '' }}</td>
+                    <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ s.additional_interests or '' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        {% else %}
+        <p style="color: var(--text-muted);">No students with high interest in this option.</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    {% if results.faculty_specific %}
+    <div class="card">
+        <h2>Faculty-Specific Matches</h2>
+        {% for fac_id, data in results.faculty_specific.items() %}
+        <h3 style="margin-top: 1rem;">{{ data.faculty.name }} — {{ data.students|length }} student(s)</h3>
+        <ul>
+            {% for s in data.students %}
+            <li><a href="{{ url_for('admin_student_detail', student_id=s.id) }}">{{ s.name }}</a>
+                {% if s.faculty_preference %}— "{{ s.faculty_preference }}"{% endif %}</li>
+            {% endfor %}
+        </ul>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if existing_cohorts %}
+    <div class="card">
+        <h2>Existing Cohort Pages</h2>
+        <p style="margin-bottom: 0.75rem; color: var(--text-muted); font-size: 0.9rem;">
+            Generating new cohorts will replace these.
+        </p>
+        <ul>
+            {% for c in existing_cohorts %}
+            <li>
+                {% if c.page_type == 'option' %}{{ option_labels.get(c.option_name, c.option_name) }}{% else %}Faculty-specific{% endif %}
+                — <a href="{{ url_for('view_cohort', slug=c.slug) }}" target="_blank">{{ url_for('view_cohort', slug=c.slug, _external=True) }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('generate_cohorts') }}">
+        <input type="hidden" name="semester" value="{{ semester }}">
+        <button type="submit" class="btn btn-primary">Generate Cohort Pages &amp; Draft Emails</button>
+    </form>
+</div>
+{% endblock %}

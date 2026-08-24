@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Admin Login — BE-SURE{% endblock %}
+
+{% block content %}
+<div class="container login-box">
+    <div class="card">
+        <h2>Admin Login</h2>
+        <form method="post">
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required autofocus>
+            </div>
+            <button type="submit" class="btn btn-primary">Log in</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

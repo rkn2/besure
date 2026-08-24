@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apply — BE-SURE Program</title>
+<meta name="description" content="Apply to the BE-SURE undergraduate research program in Architectural Engineering at Penn State.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="site-nav" aria-label="Primary">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-brand">BE<span>-SURE</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html#about">About</a></li>
+      <li><a href="index.html#options">Research Areas</a></li>
+      <li><a href="index.html#faculty">Faculty</a></li>
+      <li><a href="apply.html" class="active">Apply</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero hero--compact">
+  <div class="hero-inner">
+    <p class="hero-eyebrow">BE-SURE Program</p>
+    <h1>Student Application</h1>
+    <p class="hero-summary">
+      Interested in undergraduate research in Architectural Engineering?
+      Fill out this form and we'll work to connect you with a faculty mentor.
+    </p>
+  </div>
+</header>
+
+<section class="section">
+  <div class="section-inner">
+
+    <!--
+      SETUP: Create a free account at https://formspree.io and make a new form.
+      Replace YOUR_FORM_ID below with the form ID (e.g., "xpzgjkql").
+      Formspree will email you each submission and store them in your dashboard.
+    -->
+    <form action="https://formspree.io/f/YOUR_FORM_ID" method="POST" enctype="multipart/form-data">
+
+      <div class="form-section">
+        <h2>Your Information</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="required" for="name">Full name</label>
+            <input type="text" id="name" name="name" required>
+          </div>
+          <div class="form-group">
+            <label class="required" for="email">Email address</label>
+            <input type="email" id="email" name="email" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="graduation_year">Expected graduation year</label>
+            <input type="text" id="graduation_year" name="graduation_year" placeholder="e.g. 2027">
+          </div>
+          <div class="form-group">
+            <label for="major">Major</label>
+            <input type="text" id="major" name="major" placeholder="e.g. Architectural Engineering">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="citizenship">Are you a US citizen or permanent resident?</label>
+          <div class="help-text">Some funding agencies require this information.</div>
+          <select id="citizenship" name="citizenship">
+            <option value="">— Select —</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+            <option value="Prefer not to say">Prefer not to say</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h2>Research Interests</h2>
+        <p class="help-text" style="margin-bottom: 1rem;">Rate your interest level in each area of Architectural Engineering.</p>
+        <div class="interest-grid">
+
+          <div class="interest-row">
+            <div class="label">Structures</div>
+            <div class="interest-options">
+              <label><input type="radio" name="interest_structures" value="High interest"> High interest</label>
+              <label><input type="radio" name="interest_structures" value="Moderate interest"> Moderate interest</label>
+              <label><input type="radio" name="interest_structures" value="Low interest"> Low interest</label>
+              <label><input type="radio" name="interest_structures" value="Not at all"> Not at all</label>
+            </div>
+          </div>
+
+          <div class="interest-row">
+            <div class="label">Mechanical / Energy</div>
+            <div class="interest-options">
+              <label><input type="radio" name="interest_mechanical" value="High interest"> High interest</label>
+              <label><input type="radio" name="interest_mechanical" value="Moderate interest"> Moderate interest</label>
+              <label><input type="radio" name="interest_mechanical" value="Low interest"> Low interest</label>
+              <label><input type="radio" name="interest_mechanical" value="Not at all"> Not at all</label>
+            </div>
+          </div>
+
+          <div class="interest-row">
+            <div class="label">Lighting / Electrical</div>
+            <div class="interest-options">
+              <label><input type="radio" name="interest_lighting" value="High interest"> High interest</label>
+              <label><input type="radio" name="interest_lighting" value="Moderate interest"> Moderate interest</label>
+              <label><input type="radio" name="interest_lighting" value="Low interest"> Low interest</label>
+              <label><input type="radio" name="interest_lighting" value="Not at all"> Not at all</label>
+            </div>
+          </div>
+
+          <div class="interest-row">
+            <div class="label">Construction</div>
+            <div class="interest-options">
+              <label><input type="radio" name="interest_construction" value="High interest"> High interest</label>
+              <label><input type="radio" name="interest_construction" value="Moderate interest"> Moderate interest</label>
+              <label><input type="radio" name="interest_construction" value="Low interest"> Low interest</label>
+              <label><input type="radio" name="interest_construction" value="Not at all"> Not at all</label>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h2>Additional Information</h2>
+        <div class="form-group">
+          <label for="additional_interests">What type of research work interests you? (Optional)</label>
+          <textarea id="additional_interests" name="additional_interests"
+            placeholder="Describe any specific topics, skills, or types of projects you're interested in..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="faculty_preference">Is there a faculty member you'd like to work with? (Optional)</label>
+          <div class="help-text">If so, write their name and whether you've talked to them about it.</div>
+          <textarea id="faculty_preference" name="faculty_preference"
+            placeholder="e.g. Dr. Brown — I talked with him about structural optimization"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="resume">Upload your resume (PDF, DOC, or DOCX)</label>
+          <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx">
+        </div>
+      </div>
+
+      <input type="hidden" name="_subject" value="New BE-SURE Application">
+      <input type="hidden" name="_next" value="thanks.html">
+
+      <button type="submit" class="btn btn-primary">Submit Application</button>
+    </form>
+
+  </div>
+</section>
+
+<footer class="site-footer">
+  <p>BE-SURE Program &middot; Department of Architectural Engineering &middot; Penn State</p>
+</footer>
+
+</body>
+</html>

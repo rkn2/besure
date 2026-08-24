@@ -1,0 +1,6 @@
+admin/venv/
+admin/data/
+startingPoint/
+__pycache__/
+*.pyc
+.DS_Store

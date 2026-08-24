@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}Placements — BE-SURE Admin{% endblock %}
+
+{% block content %}
+<div class="container-wide">
+    <h1 style="margin-bottom: 1rem;">Placements</h1>
+
+    <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem; align-items: center;">
+        <span style="font-size: 0.9rem; color: var(--text-muted);">Filter:</span>
+        <a href="{{ url_for('admin_placements') }}"
+           class="btn btn-sm {% if semester == 'All' %}btn-primary{% else %}btn-secondary{% endif %}">All</a>
+        {% for s in semesters %}
+        <a href="{{ url_for('admin_placements', semester=s.semester) }}"
+           class="btn btn-sm {% if s.semester == semester %}btn-primary{% else %}btn-secondary{% endif %}">
+            {{ s.semester }}
+        </a>
+        {% endfor %}
+    </div>
+
+    {% if unplaced %}
+    <div class="card">
+        <h2>Create Placement</h2>
+        <form method="post" action="{{ url_for('create_placement') }}" style="display: flex; gap: 0.75rem; align-items: end; flex-wrap: wrap;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="student_id">Student</label>
+                <select name="student_id" id="student_id" required>
+                    <option value="">— Select —</option>
+                    {% for s in unplaced %}
+                    <option value="{{ s.id }}">{{ s.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="faculty_id">Faculty Mentor</label>
+                <select name="faculty_id" id="faculty_id" required>
+                    <option value="">— Select —</option>
+                    {% for f in faculty %}
+                    <option value="{{ f.id }}">{{ f.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Create</button>
+        </form>
+    </div>
+    {% endif %}
+
+    {% if placements %}
+    {% for p in placements %}
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 0.5rem;">
+            <div>
+                <h2 style="margin-bottom: 0.25rem;">{{ p.student_name }}</h2>
+                <div style="color: var(--text-muted); font-size: 0.85rem;">
+                    {{ p.student_email }} &middot; Mentor: {{ p.faculty_name }}
+                </div>
+            </div>
+            <span class="badge badge-{{ p.status }}">{{ p.status.replace('_', ' ').title() }}</span>
+        </div>
+
+        <form method="post" action="{{ url_for('update_placement', placement_id=p.id) }}" style="margin-top: 1rem;">
+            <input type="hidden" name="return_semester" value="{{ semester }}">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Status</label>
+                    <select name="status">
+                        {% for val, label in [('emailed', 'Emailed'), ('confirmed_faculty', 'Confirmed with Faculty'), ('confirmed_student', 'Confirmed with Student')] %}
+                        <option value="{{ val }}" {% if p.status == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>PhD/Postdoc Adviser</label>
+                    <input type="text" name="phd_postdoc_adviser" value="{{ p.phd_postdoc_adviser or '' }}">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Fall Funding Source</label>
+                    <input type="text" name="fall_funding_source" value="{{ p.fall_funding_source or '' }}" placeholder="e.g. BESURE, NSF RAPID REU">
+                </div>
+                <div class="form-group">
+                    <label>Fall Funding IO</label>
+                    <input type="text" name="fall_funding_io" value="{{ p.fall_funding_io or '' }}" placeholder="e.g. 500000023004">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Spring Funding Source</label>
+                    <input type="text" name="spring_funding_source" value="{{ p.spring_funding_source or '' }}">
+                </div>
+                <div class="form-group">
+                    <label>Spring Funding IO</label>
+                    <input type="text" name="spring_funding_io" value="{{ p.spring_funding_io or '' }}">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Summer Funding Source</label>
+                    <input type="text" name="summer_funding_source" value="{{ p.summer_funding_source or '' }}">
+                </div>
+                <div class="form-group">
+                    <label>Summer Funding IO</label>
+                    <input type="text" name="summer_funding_io" value="{{ p.summer_funding_io or '' }}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Notes</label>
+                <input type="text" name="notes" value="{{ p.notes or '' }}">
+            </div>
+
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                <label style="font-weight: 400; display: flex; align-items: center; gap: 0.3rem;">
+                    <input type="checkbox" name="presented" {% if p.presented %}checked{% endif %}> Presented poster
+                </label>
+                <label style="font-weight: 400; display: flex; align-items: center; gap: 0.3rem;">
+                    <input type="checkbox" name="nsf_grfp_applicant" {% if p.nsf_grfp_applicant %}checked{% endif %}> NSF GRFP applicant
+                </label>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="font-weight: 400;">Conference grant: </label>
+                    <input type="text" name="conference_grant" value="{{ p.conference_grant or '' }}" style="width: 200px; display: inline-block;">
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                <button type="submit" name="action" value="generate_welcome" class="btn btn-secondary btn-sm">Welcome Email</button>
+                <button type="submit" name="action" value="generate_payroll" class="btn btn-secondary btn-sm">Payroll Email</button>
+            </div>
+        </form>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="card">
+        <p style="color: var(--text-muted);">No placements yet for {{ semester }}.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
