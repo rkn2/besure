@@ -1,23 +1,25 @@
-/* AE Research Scholars Shared Design System */
+/* AE Research Scholars — styled to match ae.psu.edu
+   Colors pulled from engr.psu.edu/styles-nov2 common + department CSS.
+   Fonts: Roboto Slab (headings) + Roboto (body) — same as ae.psu.edu */
 
 :root {
-  --ink: #1B2838;
-  --gold: #C4A35A;
-  --gold-dim: #a88d4a;
-  --paper: #F5F2ED;
-  --sand: #E6E0D6;
-  --navy: #1E3A5F;
-  --navy-light: #2A4F7F;
+  --ink: #0a2240;
+  --gold: #83acd5;
+  --gold-dim: #6b94bd;
+  --paper: #ffffff;
+  --sand: #e5e6e8;
+  --navy: #002f87;
+  --navy-light: #1a4a9e;
   --steel: #4A6680;
-  --text: #2c3440;
-  --text-secondary: #5a6674;
-  --border: #cdc5b8;
+  --text: #231f20;
+  --text-secondary: #555555;
+  --border: #d2d8e1;
   --card-bg: #ffffff;
-  --code-bg: #eae5dc;
-  --hero-bg: #1E3A5F;
-  --hero-text: #F5F2ED;
-  --hero-accent: #C4A35A;
-  --hero-sub: #94a3b8;
+  --code-bg: #f0f3f6;
+  --hero-bg: #0a2240;
+  --hero-text: #ffffff;
+  --hero-accent: #83acd5;
+  --hero-sub: #b0c8e0;
   --success: #28745a;
   --success-bg: #d4edda;
   --error: #a8323c;
@@ -27,23 +29,23 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --ink: #e8e4de;
-    --paper: #161b22;
-    --sand: #1c2129;
-    --text: #c9c3b8;
+    --ink: #e0e6ee;
+    --paper: #0a1628;
+    --sand: #111e34;
+    --text: #c8d0dc;
     --text-secondary: #8b9298;
-    --border: #2d333b;
-    --card-bg: #1c2230;
-    --code-bg: #21272e;
+    --border: #253350;
+    --card-bg: #0f1d34;
+    --code-bg: #142040;
     --navy: #6ba3d4;
     --navy-light: #7db8e8;
     --steel: #8aa4ba;
-    --gold: #e0a848;
-    --gold-dim: #c89838;
-    --hero-bg: #0d1117;
-    --hero-text: #e8e4de;
-    --hero-accent: #e0a848;
-    --hero-sub: #6b7a8a;
+    --gold: #83acd5;
+    --gold-dim: #6b94bd;
+    --hero-bg: #060e1c;
+    --hero-text: #e0e6ee;
+    --hero-accent: #83acd5;
+    --hero-sub: #6b8aaa;
     --success: #4caf6e;
     --success-bg: #1a3328;
     --error: #e06070;
@@ -53,23 +55,23 @@
 }
 
 :root[data-theme="dark"] {
-  --ink: #e8e4de;
-  --paper: #161b22;
-  --sand: #1c2129;
-  --text: #c9c3b8;
+  --ink: #e0e6ee;
+  --paper: #0a1628;
+  --sand: #111e34;
+  --text: #c8d0dc;
   --text-secondary: #8b9298;
-  --border: #2d333b;
-  --card-bg: #1c2230;
-  --code-bg: #21272e;
+  --border: #253350;
+  --card-bg: #0f1d34;
+  --code-bg: #142040;
   --navy: #6ba3d4;
   --navy-light: #7db8e8;
   --steel: #8aa4ba;
-  --gold: #e0a848;
-  --gold-dim: #c89838;
-  --hero-bg: #0d1117;
-  --hero-text: #e8e4de;
-  --hero-accent: #e0a848;
-  --hero-sub: #6b7a8a;
+  --gold: #83acd5;
+  --gold-dim: #6b94bd;
+  --hero-bg: #060e1c;
+  --hero-text: #e0e6ee;
+  --hero-accent: #83acd5;
+  --hero-sub: #6b8aaa;
   --success: #4caf6e;
   --success-bg: #1a3328;
   --error: #e06070;
@@ -80,7 +82,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Roboto', Verdana, Arial, sans-serif;
   font-size: 17px;
   line-height: 1.7;
   color: var(--text);
@@ -112,7 +114,7 @@ a:hover { text-decoration: underline; }
 }
 
 .nav-brand {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: 'Roboto Slab', Georgia, serif;
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--hero-text);
@@ -184,7 +186,7 @@ a:hover { text-decoration: underline; }
 }
 
 .hero h1 {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: 'Roboto Slab', Georgia, serif;
   font-size: clamp(1.6rem, 4vw, 2.4rem);
   font-weight: 400;
   line-height: 1.3;
@@ -219,7 +221,7 @@ a:hover { text-decoration: underline; }
 }
 
 .section h2 {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: 'Roboto Slab', Georgia, serif;
   font-size: 1.5rem;
   font-weight: 400;
   color: var(--ink);
@@ -269,7 +271,7 @@ a:hover { text-decoration: underline; }
 }
 
 .form-section h2 {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: 'Roboto Slab', Georgia, serif;
   font-size: 1.15rem;
   font-weight: 400;
   color: var(--ink);
@@ -446,7 +448,7 @@ input[type="file"] { font-size: 0.9rem; }
 }
 
 .thanks h1 {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: 'Roboto Slab', Georgia, serif;
   font-size: 1.8rem;
   color: var(--ink);
   margin-bottom: 1rem;
