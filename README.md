@@ -5,6 +5,8 @@
 Matches undergraduate students with AE faculty for paid research positions ($15/hr, ~5-10 hrs/week).
 
 **Live site:** https://rkn2.github.io/besure/
+**Faculty cohort page:** https://rkn2.github.io/besure/view/
+**Placements & funding (for finance):** https://rkn2.github.io/besure/placements.html
 
 ## How it works
 
