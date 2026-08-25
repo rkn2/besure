@@ -1,26 +1,23 @@
-/* AE Research Scholars — Penn State Brand Design System
-   Colors: brand.psu.edu — Nittany Navy, Beaver Blue, Bright Keystone, etc. */
+/* AE Research Scholars Shared Design System */
 
 :root {
-  --ink: #001E44;
-  --gold: #FFD100;
-  --gold-dim: #e6bc00;
-  --paper: #ffffff;
-  --sand: #E5EDF8;
-  --navy: #1E407C;
-  --navy-light: #2c5aaa;
+  --ink: #1B2838;
+  --gold: #C4A35A;
+  --gold-dim: #a88d4a;
+  --paper: #F5F2ED;
+  --sand: #E6E0D6;
+  --navy: #1E3A5F;
+  --navy-light: #2A4F7F;
   --steel: #4A6680;
-  --sky: #009CDE;
-  --pugh: #96BEE6;
-  --text: #262626;
-  --text-secondary: #555555;
-  --border: #d0d5dd;
+  --text: #2c3440;
+  --text-secondary: #5a6674;
+  --border: #cdc5b8;
   --card-bg: #ffffff;
-  --code-bg: #f0f4f8;
-  --hero-bg: #001E44;
-  --hero-text: #ffffff;
-  --hero-accent: #FFD100;
-  --hero-sub: #96BEE6;
+  --code-bg: #eae5dc;
+  --hero-bg: #1E3A5F;
+  --hero-text: #F5F2ED;
+  --hero-accent: #C4A35A;
+  --hero-sub: #94a3b8;
   --success: #28745a;
   --success-bg: #d4edda;
   --error: #a8323c;
@@ -30,25 +27,23 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --ink: #e0e6ee;
-    --paper: #0a1628;
-    --sand: #111e34;
-    --text: #c8d0dc;
+    --ink: #e8e4de;
+    --paper: #161b22;
+    --sand: #1c2129;
+    --text: #c9c3b8;
     --text-secondary: #8b9298;
-    --border: #253350;
-    --card-bg: #0f1d34;
-    --code-bg: #142040;
+    --border: #2d333b;
+    --card-bg: #1c2230;
+    --code-bg: #21272e;
     --navy: #6ba3d4;
     --navy-light: #7db8e8;
     --steel: #8aa4ba;
-    --sky: #4db8e8;
-    --pugh: #6ba3d4;
-    --gold: #FFD100;
-    --gold-dim: #e6bc00;
-    --hero-bg: #000e24;
-    --hero-text: #e0e6ee;
-    --hero-accent: #FFD100;
-    --hero-sub: #6b8aaa;
+    --gold: #e0a848;
+    --gold-dim: #c89838;
+    --hero-bg: #0d1117;
+    --hero-text: #e8e4de;
+    --hero-accent: #e0a848;
+    --hero-sub: #6b7a8a;
     --success: #4caf6e;
     --success-bg: #1a3328;
     --error: #e06070;
@@ -58,25 +53,23 @@
 }
 
 :root[data-theme="dark"] {
-  --ink: #e0e6ee;
-  --paper: #0a1628;
-  --sand: #111e34;
-  --text: #c8d0dc;
+  --ink: #e8e4de;
+  --paper: #161b22;
+  --sand: #1c2129;
+  --text: #c9c3b8;
   --text-secondary: #8b9298;
-  --border: #253350;
-  --card-bg: #0f1d34;
-  --code-bg: #142040;
+  --border: #2d333b;
+  --card-bg: #1c2230;
+  --code-bg: #21272e;
   --navy: #6ba3d4;
   --navy-light: #7db8e8;
   --steel: #8aa4ba;
-  --sky: #4db8e8;
-  --pugh: #6ba3d4;
-  --gold: #FFD100;
-  --gold-dim: #e6bc00;
-  --hero-bg: #000e24;
-  --hero-text: #e0e6ee;
-  --hero-accent: #FFD100;
-  --hero-sub: #6b8aaa;
+  --gold: #e0a848;
+  --gold-dim: #c89838;
+  --hero-bg: #0d1117;
+  --hero-text: #e8e4de;
+  --hero-accent: #e0a848;
+  --hero-sub: #6b7a8a;
   --success: #4caf6e;
   --success-bg: #1a3328;
   --error: #e06070;
@@ -87,7 +80,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: 'Roboto Slab', Georgia, 'Times New Roman', serif;
+  font-family: -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   font-size: 17px;
   line-height: 1.7;
   color: var(--text);
@@ -119,7 +112,7 @@ a:hover { text-decoration: underline; }
 }
 
 .nav-brand {
-  font-family: 'Montserrat', Arial, sans-serif;
+  font-family: Georgia, 'Times New Roman', serif;
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--hero-text);
@@ -191,7 +184,7 @@ a:hover { text-decoration: underline; }
 }
 
 .hero h1 {
-  font-family: 'Montserrat', Arial, sans-serif;
+  font-family: Georgia, 'Times New Roman', serif;
   font-size: clamp(1.6rem, 4vw, 2.4rem);
   font-weight: 400;
   line-height: 1.3;
@@ -226,7 +219,7 @@ a:hover { text-decoration: underline; }
 }
 
 .section h2 {
-  font-family: 'Montserrat', Arial, sans-serif;
+  font-family: Georgia, 'Times New Roman', serif;
   font-size: 1.5rem;
   font-weight: 400;
   color: var(--ink);
@@ -276,7 +269,7 @@ a:hover { text-decoration: underline; }
 }
 
 .form-section h2 {
-  font-family: 'Montserrat', Arial, sans-serif;
+  font-family: Georgia, 'Times New Roman', serif;
   font-size: 1.15rem;
   font-weight: 400;
   color: var(--ink);
@@ -297,7 +290,6 @@ a:hover { text-decoration: underline; }
 
 label {
   display: block;
-  font-family: 'Montserrat', Arial, sans-serif;
   font-weight: 500;
   font-size: 0.88rem;
   margin-bottom: 0.35rem;
@@ -322,7 +314,7 @@ input[type="password"], select, textarea {
   border: 1px solid var(--border);
   border-radius: 5px;
   font-size: 0.95rem;
-  font-family: 'Montserrat', Arial, sans-serif;
+  font-family: inherit;
   background: var(--card-bg);
   color: var(--text);
 }
@@ -454,7 +446,7 @@ input[type="file"] { font-size: 0.9rem; }
 }
 
 .thanks h1 {
-  font-family: 'Montserrat', Arial, sans-serif;
+  font-family: Georgia, 'Times New Roman', serif;
   font-size: 1.8rem;
   color: var(--ink);
   margin-bottom: 1rem;
