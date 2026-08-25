@@ -48,21 +48,23 @@ pip install -r requirements.txt
 Export the linked Google Sheet as CSV (File → Download → CSV). The script auto-detects column names from both Google Forms exports (full question text headers) and short-name CSVs.
 
 ```
-python admin/generate_cohorts.py submissions.csv --semester "Fall 2026" --resumes-dir ./resumes
+cd ~/Code/besure-admin
+python generate_cohorts.py submissions.csv --semester "Fall 2026" --resumes-dir ./resumes
 ```
 
-This generates static HTML pages in `view/` with unguessable URLs, prints draft emails, and flags:
+This generates a single page at `view/index.html` with all students embedded as data, prints draft emails, and flags:
 - Students who matched zero cohorts (all Moderate/Low, no named faculty)
 - Students who named unrecognized faculty
 
-Then push:
+Then push from the website repo:
 ```
+cd ~/Code/besure
 git add view/
 git commit -m "Generate Fall 2026 cohort pages"
 git push
 ```
 
-Faculty get a link like `https://rkn2.github.io/besure/view/random-slug/` — no login needed.
+All faculty get the same link — `https://rkn2.github.io/besure/view/` — select their name to see students matched to their research area, with filters to browse others.
 
 ## Matching rules
 
@@ -95,8 +97,6 @@ Pipeline: emailed → confirmed with faculty → confirmed with student
 
 Funding tracked per semester with separate source label and IO number fields. Payroll emails go to Michele Kephart.
 
-## TODO
+## Faculty response tracking
 
-- [ ] **Create Google Form** with the 12 fields listed above and plug the URL into `apply.html`
-- [ ] **Faculty response tracking on cohort pages** — let faculty indicate interest directly on the student pages (e.g., write their name + status: "emailed student", "offered position", "did not offer position") so other faculty can see who is still available vs already claimed. Could be a simple form on each cohort page that writes back to a shared sheet or updates the page.
-- [ ] Decide on private hosting for cohort pages (public repo means `view/` is browsable — URLs are unguessable but not truly private)
+Each student card includes a form where faculty can indicate their interest (Interested / Emailed student / Offered position / Did not offer position). Responses are stored via a Google Apps Script web app in the "Faculty Responses" tab of the linked Google Sheet. The Apps Script source is in `apps-script.js` for reference; the deployed URL is configured in `response-tracking.js`.
