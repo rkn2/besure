@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>AE Research Scholars — Fall 2026 Applicants</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@300;400;500;600;900&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+<style>
+.faculty-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+.faculty-bar label {
+  font-weight: 500;
+  font-size: 0.95rem;
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+#faculty-select {
+  flex: 1;
+  max-width: 320px;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.95rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--card-bg);
+  color: var(--text);
+  font-family: inherit;
+}
+#faculty-select:focus {
+  outline: none;
+  border-color: var(--navy);
+  box-shadow: 0 0 0 2px rgba(30,58,95,0.15);
+}
+.filter-bar {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+.filter-chip {
+  padding: 0.3rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.filter-chip:hover {
+  border-color: var(--navy);
+  color: var(--text);
+}
+.filter-chip.active {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: var(--hero-text);
+}
+.student-count {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+.badge-requested {
+  background: #e8d5f5;
+  color: #6b2fa0;
+  padding: 0.15rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-left: 0.5rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .badge-requested {
+    background: #2d1a42;
+    color: #c9a0e8;
+  }
+}
+:root[data-theme="dark"] .badge-requested {
+  background: #2d1a42;
+  color: #c9a0e8;
+}
+.student-card.dimmed { opacity: 0.45; order: 99; }
+.student-card { transition: opacity 0.2s; }
+#student-list { display: flex; flex-direction: column; }
+</style>
+</head>
+<body>
+
+<header class="hero hero--compact" style="border-bottom:2px solid var(--hero-accent);">
+  <div class="hero-inner">
+    <p class="hero-eyebrow">Fall 2026</p>
+    <h1>AE Research Scholars — Student Applicants</h1>
+  </div>
+</header>
+
+<section class="section">
+  <div class="section-inner">
+    <p style="margin-bottom:1.5rem;color:var(--text-secondary);">
+      Select your name to see students matched to your research area.
+      If you'd like to interview a student, use the form on their card or contact Doc Nap.
+    </p>
+
+    <div class="faculty-bar">
+      <label for="faculty-select">I am:</label>
+      <select id="faculty-select">
+        <option value="">Select your name…</option>
+      </select>
+    </div>
+
+    <div class="filter-bar" id="filter-bar"></div>
+
+    <p class="student-count" id="student-count"></p>
+
+    <div id="student-list"></div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <p>AE Research Scholars Program &middot; Department of Architectural Engineering &middot; Penn State</p>
+</footer>
+
+<script>
+(function () {
+  var STUDENTS = [
+    {
+      name: 'Lucas Paret',
+      email: 'lwp5200@psu.edu',
+      gradYear: 2028,
+      major: 'Architectural Engineering',
+      interests: { 'Structures': null, 'Mechanical / Energy': 'Moderate', 'Lighting / Electrical': 'High', 'Construction': null },
+      description: 'Working in the lighting lab with Alp, learning electrical systems/control systems for smart buildings.',
+      facultyPref: 'Dorukalp Durmus',
+      resume: null
+    },
+    {
+      name: 'Joshua Fuquen',
+      email: 'jaf6841@psu.edu',
+      gradYear: 2029,
+      major: 'Computer Science',
+      interests: { 'Structures': 'Moderate', 'Mechanical / Energy': 'Moderate', 'Lighting / Electrical': 'High', 'Construction': null },
+      description: null,
+      facultyPref: null,
+      resume: null
+    },
+    {
+      name: 'Gianna Wray',
+      email: 'ggw5072@psu.edu',
+      gradYear: 2030,
+      major: 'Architectural Engineering',
+      interests: { 'Structures': 'High', 'Mechanical / Energy': null, 'Lighting / Electrical': null, 'Construction': 'High' },
+      description: 'I am extremely interested in forensic engineering and would love to enhance my interest!',
+      facultyPref: 'Juan Pablo Gevaudan',
+      resume: null
+    },
+    {
+      name: 'Jhanvi Venkitesh',
+      email: 'JSV5254@psu.edu',
+      gradYear: 2029,
+      major: 'Architectural Engineering',
+      interests: { 'Structures': 'High', 'Mechanical / Energy': 'Moderate', 'Lighting / Electrical': null, 'Construction': null },
+      description: 'I am interested in building materials, structural analysis, forensic analysis, building deterioration and durability, and building disaster research.',
+      facultyPref: 'Rebecca Napolitano',
+      resume: null
+    },
+    {
+      name: 'Ashlyn Ferderbar',
+      email: 'agf5334@psu.edu',
+      gradYear: 2030,
+      major: 'Architectural Engineering',
+      interests: { 'Structures': 'High', 'Mechanical / Energy': null, 'Lighting / Electrical': null, 'Construction': 'High' },
+      description: 'Building preservation',
+      facultyPref: 'Dr. Rebecca Napolitano or Dr. JP Gevaudan Burgos',
+      resume: 'resumes/ashlyn-ferderbar.pdf'
+    },
+    {
+      name: 'Brianna Helmrich',
+      email: 'bph5618@psu.edu',
+      gradYear: 2030,
+      major: 'Architectural Engineering',
+      interests: { 'Structures': 'Moderate', 'Mechanical / Energy': null, 'Lighting / Electrical': null, 'Construction': 'High' },
+      description: 'I have a strong passion for residential construction, but I would be open to gaining any work experience in any branch of AE.',
+      facultyPref: null,
+      resume: null
+    }
+  ];
+
+  var FACULTY_OPTIONS = {
+    'Nathan Brown': ['Structures'],
+    'Rebecca Napolitano': ['Structures'],
+    'Yuqing Hu': ['Mechanical / Energy', 'Construction'],
+    'Greg Pavlak': ['Mechanical / Energy'],
+    'Wangda Zuo': ['Mechanical / Energy'],
+    'Donghyun Rim': ['Mechanical / Energy'],
+    'Julian Wang': ['Lighting / Electrical'],
+    'Dorukalp Durmus': ['Lighting / Electrical'],
+    'John Messner': ['Construction'],
+    'Rob Leicht': ['Construction'],
+    'Juan Pablo Gevaudan': ['Construction']
+  };
+
+  var OPTIONS = ['Structures', 'Mechanical / Energy', 'Lighting / Electrical', 'Construction'];
+
+  var facultySelect = document.getElementById('faculty-select');
+  var filterBar = document.getElementById('filter-bar');
+  var studentList = document.getElementById('student-list');
+  var studentCount = document.getElementById('student-count');
+  var activeFilters = new Set();
+
+  // Build faculty dropdown
+  Object.keys(FACULTY_OPTIONS).forEach(function (name) {
+    var opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name;
+    facultySelect.appendChild(opt);
+  });
+
+  // Build filter chips
+  var allChip = makeChip('All Students', 'all');
+  filterBar.appendChild(allChip);
+  OPTIONS.forEach(function (opt) {
+    filterBar.appendChild(makeChip(opt, opt));
+  });
+
+  // Render all student cards
+  STUDENTS.forEach(function (s) {
+    var card = document.createElement('div');
+    card.className = 'student-card';
+    card.dataset.email = s.email;
+
+    var highOptions = OPTIONS.filter(function (o) { return s.interests[o] === 'High'; });
+    card.dataset.options = highOptions.join(',');
+    if (s.facultyPref) card.dataset.facultyPref = s.facultyPref;
+
+    var badgesHtml = '';
+    OPTIONS.forEach(function (o) {
+      var level = s.interests[o];
+      if (!level) return;
+      var cls = level === 'High' ? 'badge-high' : 'badge-moderate';
+      badgesHtml += '<span class="badge ' + cls + '">' + o + ': ' + level + '</span> ';
+    });
+
+    var descHtml = s.description ? '<div class="description">' + escapeHtml(s.description) + '</div>' : '';
+    var prefHtml = s.facultyPref ? '<div class="description" style="color:var(--text-secondary);font-style:italic;">Faculty preference: ' + escapeHtml(s.facultyPref) + '</div>' : '';
+    var resumeHtml = s.resume ? '<div class="resume-link"><a href="' + s.resume + '" target="_blank" class="btn btn-secondary" style="font-size:0.82rem;padding:0.35rem 0.8rem;margin-top:0.4rem;">View Resume (PDF)</a></div>' : '';
+
+    card.innerHTML =
+      '<h3>' + escapeHtml(s.name) + '<span class="badge-requested" style="display:none;">Requested you</span></h3>' +
+      '<div class="meta">' + escapeHtml(s.email) + ' &middot; Graduating ' + s.gradYear + ' &middot; ' + escapeHtml(s.major) + '</div>' +
+      '<div class="interests">' + badgesHtml + '</div>' +
+      descHtml + prefHtml + resumeHtml;
+
+    studentList.appendChild(card);
+  });
+
+  // Set initial state: show all
+  setAllActive();
+
+  // Restore faculty selection from localStorage
+  try {
+    var saved = localStorage.getItem('ae-scholars-faculty');
+    if (saved && FACULTY_OPTIONS[saved]) {
+      facultySelect.value = saved;
+      onFacultyChange();
+    }
+  } catch (e) {}
+
+  // Events
+  facultySelect.addEventListener('change', function () {
+    try { localStorage.setItem('ae-scholars-faculty', facultySelect.value); } catch (e) {}
+    onFacultyChange();
+  });
+
+  function onFacultyChange() {
+    var faculty = facultySelect.value;
+    if (!faculty) {
+      setAllActive();
+      clearRequestedBadges();
+      applyFilters();
+      return;
+    }
+
+    var opts = FACULTY_OPTIONS[faculty] || [];
+    activeFilters.clear();
+    opts.forEach(function (o) { activeFilters.add(o); });
+    updateChipStates();
+    highlightRequested(faculty);
+    applyFilters();
+  }
+
+  function setAllActive() {
+    activeFilters.clear();
+    activeFilters.add('all');
+    updateChipStates();
+  }
+
+  function makeChip(label, value) {
+    var btn = document.createElement('button');
+    btn.className = 'filter-chip';
+    btn.textContent = label;
+    btn.dataset.filter = value;
+    btn.addEventListener('click', function () {
+      if (value === 'all') {
+        setAllActive();
+      } else {
+        activeFilters.delete('all');
+        if (activeFilters.has(value)) {
+          activeFilters.delete(value);
+          if (activeFilters.size === 0) activeFilters.add('all');
+        } else {
+          activeFilters.add(value);
+        }
+      }
+      updateChipStates();
+      applyFilters();
+    });
+    return btn;
+  }
+
+  function updateChipStates() {
+    var chips = filterBar.querySelectorAll('.filter-chip');
+    chips.forEach(function (c) {
+      c.classList.toggle('active', activeFilters.has(c.dataset.filter));
+    });
+  }
+
+  function applyFilters() {
+    var showAll = activeFilters.has('all');
+    var faculty = facultySelect.value;
+    var visible = 0;
+
+    var cards = studentList.querySelectorAll('.student-card');
+    cards.forEach(function (card) {
+      var cardOptions = (card.dataset.options || '').split(',').filter(Boolean);
+      var matchesFilter = showAll || cardOptions.some(function (o) { return activeFilters.has(o); });
+      var requestedByFaculty = faculty && card.dataset.facultyPref &&
+        card.dataset.facultyPref.toLowerCase().indexOf(faculty.split(' ').pop().toLowerCase()) !== -1;
+
+      if (matchesFilter || requestedByFaculty) {
+        card.style.display = '';
+        card.classList.remove('dimmed');
+        visible++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+
+    studentCount.textContent = visible + ' of ' + STUDENTS.length + ' students shown';
+  }
+
+  function highlightRequested(faculty) {
+    var cards = studentList.querySelectorAll('.student-card');
+    var lastName = faculty.split(' ').pop().toLowerCase();
+    cards.forEach(function (card) {
+      var badge = card.querySelector('.badge-requested');
+      var pref = card.dataset.facultyPref || '';
+      if (pref.toLowerCase().indexOf(lastName) !== -1) {
+        badge.style.display = '';
+      } else {
+        badge.style.display = 'none';
+      }
+    });
+  }
+
+  function clearRequestedBadges() {
+    var badges = studentList.querySelectorAll('.badge-requested');
+    badges.forEach(function (b) { b.style.display = 'none'; });
+  }
+
+  function escapeHtml(str) {
+    var d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+})();
+</script>
+<script src="../response-tracking.js"></script>
+</body>
+</html>
