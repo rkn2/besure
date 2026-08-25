@@ -87,13 +87,90 @@ def extract_faculty_names(text):
     return matched, []
 
 
+COLUMN_ALIASES = {
+    "name": ["name", "full name", "applicant name"],
+    "email": ["email", "email address"],
+    "graduation_year": ["graduation_year", "expected graduation year"],
+    "major": ["major", "what is your (intended) major?"],
+    "citizenship": [
+        "citizenship",
+        "are you a us citizen or permanent resident?",
+        "are you a us citizen or permanent resident? (some funding agencies require this information for use of their funds)",
+    ],
+    "interest_structures": [
+        "interest_structures",
+        "structures",
+        "rate your interest in structures",
+    ],
+    "interest_mechanical": [
+        "interest_mechanical",
+        "mechanical",
+        "mechanical / energy",
+        "rate your interest in mechanical / energy",
+    ],
+    "interest_lighting": [
+        "interest_lighting",
+        "lighting",
+        "lighting / electrical",
+        "rate your interest in lighting / electrical",
+    ],
+    "interest_construction": [
+        "interest_construction",
+        "construction",
+        "rate your interest in construction",
+    ],
+    "additional_interests": [
+        "additional_interests",
+        "what type of research work interests you?",
+        "what type of research work interests you? (optional)",
+        "if you have other information about the type of work you would be interested in doing, please provide a brief description here. (optional)",
+    ],
+    "faculty_preference": [
+        "faculty_preference",
+        "is there a faculty member you would like to work with?",
+        "is there a faculty member you would like to work with? (optional)",
+        "is there a faculty member you would like to work with (check out our websites!!)? if so, please write their name here and indicate whether you have talked to them about this or not yet. (optional)",
+    ],
+    "resume_filename": [
+        "resume",
+        "please upload a copy of your resume",
+        "please upload a copy of your resume.",
+        "upload your resume",
+    ],
+}
+
+
+def _build_column_map(headers):
+    """Map our internal field names to actual CSV column headers."""
+    col_map = {}
+    lower_headers = {h.lower().strip(): h for h in headers}
+    for field, aliases in COLUMN_ALIASES.items():
+        for alias in aliases:
+            if alias.lower() in lower_headers:
+                col_map[field] = lower_headers[alias.lower()]
+                break
+        if field not in col_map:
+            for header_lower, header_orig in lower_headers.items():
+                for alias in aliases:
+                    if alias.lower() in header_lower:
+                        col_map[field] = header_orig
+                        break
+                if field in col_map:
+                    break
+    return col_map
+
+
 def read_submissions(csv_path):
     students = []
     with open(csv_path, newline="", encoding="utf-8-sig") as f:
         reader = csv.DictReader(f)
+        col_map = _build_column_map(reader.fieldnames or [])
         for row in reader:
-            def val(key):
-                return (row.get(key) or "").strip()
+            def val(field):
+                csv_col = col_map.get(field)
+                if csv_col is None:
+                    return ""
+                return (row.get(csv_col) or "").strip()
             students.append({
                 "name": val("name"),
                 "email": val("email"),
@@ -106,7 +183,7 @@ def read_submissions(csv_path):
                 "interest_construction": val("interest_construction"),
                 "additional_interests": val("additional_interests"),
                 "faculty_preference": val("faculty_preference"),
-                "resume_filename": val("resume"),
+                "resume_filename": val("resume_filename"),
             })
     return students
 

@@ -35,122 +35,43 @@
   </div>
 </header>
 
+<!--
+  SETUP: Create a Google Form with these questions:
+    1. Full name (Short answer, Required)
+    2. Email address (Short answer, Required)
+    3. Expected graduation year (Short answer)
+    4. What is your (intended) major? (Short answer)
+    5. Are you a US citizen or permanent resident? (Multiple choice: Yes / No / Prefer not to say)
+    6. Rate your interest in Structures (Multiple choice: High interest / Moderate interest / Low interest / Not at all)
+    7. Rate your interest in Mechanical / Energy (same options)
+    8. Rate your interest in Lighting / Electrical (same options)
+    9. Rate your interest in Construction (same options)
+   10. What type of research work interests you? (Paragraph, optional)
+   11. Is there a faculty member you would like to work with? (Paragraph, optional)
+   12. Please upload a copy of your resume (File upload: PDF, DOC, DOCX)
+
+  Then replace YOUR_GOOGLE_FORM_URL below with the form's public link.
+  To get responses: open the form > Responses tab > green Sheets icon > creates a linked Google Sheet.
+-->
+
 <section class="section">
   <div class="section-inner">
 
-    <!--
-      SETUP: Create a free account at https://formspree.io and make a new form.
-      Replace YOUR_FORM_ID below with the form ID (e.g., "xpzgjkql").
-      Formspree will email you each submission and store them in your dashboard.
-    -->
-    <form action="https://formspree.io/f/YOUR_FORM_ID" method="POST" enctype="multipart/form-data">
-
-      <div class="form-section">
-        <h2>Your Information</h2>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="required" for="name">Full name</label>
-            <input type="text" id="name" name="name" required>
-          </div>
-          <div class="form-group">
-            <label class="required" for="email">Email address</label>
-            <input type="email" id="email" name="email" required>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="graduation_year">Expected graduation year</label>
-            <input type="text" id="graduation_year" name="graduation_year" placeholder="e.g. 2027">
-          </div>
-          <div class="form-group">
-            <label for="major">Major</label>
-            <input type="text" id="major" name="major" placeholder="e.g. Architectural Engineering">
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="citizenship">Are you a US citizen or permanent resident?</label>
-          <div class="help-text">Some funding agencies require this information.</div>
-          <select id="citizenship" name="citizenship">
-            <option value="">— Select —</option>
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-            <option value="Prefer not to say">Prefer not to say</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-section">
-        <h2>Research Interests</h2>
-        <p class="help-text" style="margin-bottom: 1rem;">Rate your interest level in each area of Architectural Engineering.</p>
-        <div class="interest-grid">
-
-          <div class="interest-row">
-            <div class="label">Structures</div>
-            <div class="interest-options">
-              <label><input type="radio" name="interest_structures" value="High interest"> High interest</label>
-              <label><input type="radio" name="interest_structures" value="Moderate interest"> Moderate interest</label>
-              <label><input type="radio" name="interest_structures" value="Low interest"> Low interest</label>
-              <label><input type="radio" name="interest_structures" value="Not at all"> Not at all</label>
-            </div>
-          </div>
-
-          <div class="interest-row">
-            <div class="label">Mechanical / Energy</div>
-            <div class="interest-options">
-              <label><input type="radio" name="interest_mechanical" value="High interest"> High interest</label>
-              <label><input type="radio" name="interest_mechanical" value="Moderate interest"> Moderate interest</label>
-              <label><input type="radio" name="interest_mechanical" value="Low interest"> Low interest</label>
-              <label><input type="radio" name="interest_mechanical" value="Not at all"> Not at all</label>
-            </div>
-          </div>
-
-          <div class="interest-row">
-            <div class="label">Lighting / Electrical</div>
-            <div class="interest-options">
-              <label><input type="radio" name="interest_lighting" value="High interest"> High interest</label>
-              <label><input type="radio" name="interest_lighting" value="Moderate interest"> Moderate interest</label>
-              <label><input type="radio" name="interest_lighting" value="Low interest"> Low interest</label>
-              <label><input type="radio" name="interest_lighting" value="Not at all"> Not at all</label>
-            </div>
-          </div>
-
-          <div class="interest-row">
-            <div class="label">Construction</div>
-            <div class="interest-options">
-              <label><input type="radio" name="interest_construction" value="High interest"> High interest</label>
-              <label><input type="radio" name="interest_construction" value="Moderate interest"> Moderate interest</label>
-              <label><input type="radio" name="interest_construction" value="Low interest"> Low interest</label>
-              <label><input type="radio" name="interest_construction" value="Not at all"> Not at all</label>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <div class="form-section">
-        <h2>Additional Information</h2>
-        <div class="form-group">
-          <label for="additional_interests">What type of research work interests you? (Optional)</label>
-          <textarea id="additional_interests" name="additional_interests"
-            placeholder="Describe any specific topics, skills, or types of projects you're interested in..."></textarea>
-        </div>
-        <div class="form-group">
-          <label for="faculty_preference">Is there a faculty member you'd like to work with? (Optional)</label>
-          <div class="help-text">If so, write their name and whether you've talked to them about it.</div>
-          <textarea id="faculty_preference" name="faculty_preference"
-            placeholder="e.g. Dr. Brown — I talked with him about structural optimization"></textarea>
-        </div>
-        <div class="form-group">
-          <label for="resume">Upload your resume (PDF, DOC, or DOCX)</label>
-          <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx">
-        </div>
-      </div>
-
-      <input type="hidden" name="_subject" value="New AE Research Scholars Application">
-      <input type="hidden" name="_next" value="thanks.html">
-
-      <button type="submit" class="btn btn-primary">Submit Application</button>
-    </form>
+    <div class="card" style="text-align: center; padding: 2.5rem 2rem;">
+      <h2 style="border: none; margin-bottom: 0.75rem;">Ready to apply?</h2>
+      <p style="margin-bottom: 0.5rem;">The application takes about 5 minutes. You'll need:</p>
+      <ul style="list-style: none; margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.95rem;">
+        <li>Your basic info (name, email, major, graduation year)</li>
+        <li>Your interest level in each AE research area</li>
+        <li>A copy of your resume (PDF, DOC, or DOCX)</li>
+      </ul>
+      <a href="YOUR_GOOGLE_FORM_URL" target="_blank" rel="noopener" class="btn btn-primary" style="font-size: 1.05rem; padding: 0.8rem 2rem;">
+        Open Application Form
+      </a>
+      <p style="margin-top: 1rem; font-size: 0.82rem; color: var(--text-secondary);">
+        Opens in Google Forms in a new tab.
+      </p>
+    </div>
 
   </div>
 </section>

@@ -8,19 +8,31 @@ Matches undergraduate students with AE faculty for paid research positions ($15/
 
 ## How it works
 
-1. Students fill out the application form at `/apply.html`
-2. Submissions go to Formspree (email notification + stored in dashboard)
-3. At the start of each semester, export submissions as CSV and download resumes from Formspree
+1. Students fill out the application via Google Form (linked from `/apply.html`)
+2. Submissions land in a linked Google Sheet (with resumes in Google Drive)
+3. At the start of each semester, export the Google Sheet as CSV
 4. Run `admin/generate_cohorts.py` to match students → faculty and generate cohort pages + draft emails
 5. Push the generated `view/` pages, copy the draft emails, send
 6. Track placements and funding with the local Flask admin app
 
 ## Setup
 
-### Formspree (one-time)
-1. Create a free account at https://formspree.io
-2. Create a new form
-3. In `apply.html`, replace `YOUR_FORM_ID` with your form ID
+### Google Form (one-time)
+1. Create a Google Form with these questions:
+   - Full name (Short answer, Required)
+   - Email address (Short answer, Required)
+   - Expected graduation year (Short answer)
+   - What is your (intended) major? (Short answer)
+   - Are you a US citizen or permanent resident? (Multiple choice: Yes / No / Prefer not to say)
+   - Rate your interest in Structures (Multiple choice: High interest / Moderate interest / Low interest / Not at all)
+   - Rate your interest in Mechanical / Energy (same options)
+   - Rate your interest in Lighting / Electrical (same options)
+   - Rate your interest in Construction (same options)
+   - What type of research work interests you? (Paragraph, optional)
+   - Is there a faculty member you would like to work with? (Paragraph, optional)
+   - Please upload a copy of your resume (File upload)
+2. Link it to a Google Sheet: open form → Responses tab → green Sheets icon
+3. In `apply.html`, replace `YOUR_GOOGLE_FORM_URL` with the form's public link
 4. Commit and push
 
 ### Local admin tools
@@ -33,7 +45,7 @@ pip install -r requirements.txt
 
 ## Generating cohort pages
 
-Export form submissions as CSV from Formspree. Column names should match the form field names (`name`, `email`, `graduation_year`, `major`, `citizenship`, `interest_structures`, `interest_mechanical`, `interest_lighting`, `interest_construction`, `additional_interests`, `faculty_preference`, `resume`).
+Export the linked Google Sheet as CSV (File → Download → CSV). The script auto-detects column names from both Google Forms exports (full question text headers) and short-name CSVs.
 
 ```
 python admin/generate_cohorts.py submissions.csv --semester "Fall 2026" --resumes-dir ./resumes
@@ -93,5 +105,5 @@ Funding tracked per semester with separate source label and IO number fields. Pa
 
 ## TODO
 
-- [ ] Set up Formspree account and plug in form ID in `apply.html`
+- [ ] Create Google Form and plug in form URL in `apply.html`
 - [ ] Decide on private hosting for cohort pages (public repo means `view/` is browsable — URLs are unguessable but not truly private)
