@@ -125,6 +125,7 @@
       '</div>' +
       '<div class="funding-fields" style="display:none;">' +
         '<label class="response-form-label" style="margin-top:0.6rem;">Funding information:</label>' +
+        '<p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:0.4rem;">One semester is funded by BESURE (department), the other by PI funds. Enter the fund source or IO number for each period.</p>' +
         '<div class="response-form-row" style="margin-bottom:0.4rem;">' +
           '<select class="response-select" name="periodType">' +
             '<option value="Academic Year">Academic Year (Fall + Spring)</option>' +
@@ -132,8 +133,8 @@
           '</select>' +
         '</div>' +
         '<div class="response-form-row">' +
-          '<input type="text" class="response-select" name="fund1" placeholder="Fall fund / IO number">' +
-          '<input type="text" class="response-select" name="fund2" placeholder="Spring fund / IO number">' +
+          '<input type="text" class="response-select" name="fund1" placeholder="Fall — e.g., BESURE">' +
+          '<input type="text" class="response-select" name="fund2" placeholder="Spring — e.g., IO number">' +
         '</div>' +
       '</div>' +
       '<div class="response-msg"></div>';
@@ -157,11 +158,11 @@
 
     function updateFundLabels() {
       if (periodSelect.value === 'Summer') {
-        fund1Input.placeholder = '1st Half Summer fund / IO number';
-        fund2Input.placeholder = '2nd Half Summer fund / IO number';
+        fund1Input.placeholder = '1st Half Summer — e.g., BESURE';
+        fund2Input.placeholder = '2nd Half Summer — e.g., IO number';
       } else {
-        fund1Input.placeholder = 'Fall fund / IO number';
-        fund2Input.placeholder = 'Spring fund / IO number';
+        fund1Input.placeholder = 'Fall — e.g., BESURE';
+        fund2Input.placeholder = 'Spring — e.g., IO number';
       }
     }
 
