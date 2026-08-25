@@ -23,6 +23,7 @@
     'Interested',
     'Emailed student',
     'Offered position',
+    'Student accepted',
     'Did not offer position'
   ];
 
@@ -40,7 +41,7 @@
   cards.forEach(function (card) {
     var name = (card.querySelector('h3') || {}).textContent || '';
     var meta = (card.querySelector('.meta') || {}).textContent || '';
-    var email = meta.split('·')[0].trim(); // split on middot
+    var email = meta.split('·')[0].trim();
     students.push({ card: card, name: name.trim(), email: email });
     renderForm(card, name.trim(), email);
   });
@@ -87,7 +88,8 @@
       item.className = 'response-item';
       var statusClass = 'response-status--default';
       var s = (r['Status'] || '').toLowerCase();
-      if (s === 'offered position') statusClass = 'response-status--offered';
+      if (s === 'student accepted') statusClass = 'response-status--confirmed';
+      else if (s === 'offered position') statusClass = 'response-status--offered';
       else if (s === 'interested' || s === 'emailed student') statusClass = 'response-status--interested';
       else if (s === 'did not offer position') statusClass = 'response-status--declined';
       item.innerHTML =
@@ -121,12 +123,52 @@
         '</select>' +
         '<button type="submit" class="btn btn-primary response-submit">Submit</button>' +
       '</div>' +
+      '<div class="funding-fields" style="display:none;">' +
+        '<label class="response-form-label" style="margin-top:0.6rem;">Funding information:</label>' +
+        '<div class="response-form-row" style="margin-bottom:0.4rem;">' +
+          '<select class="response-select" name="periodType">' +
+            '<option value="Academic Year">Academic Year (Fall + Spring)</option>' +
+            '<option value="Summer">Summer (1st Half + 2nd Half)</option>' +
+          '</select>' +
+        '</div>' +
+        '<div class="response-form-row">' +
+          '<input type="text" class="response-select" name="fund1" placeholder="Fall fund / IO number">' +
+          '<input type="text" class="response-select" name="fund2" placeholder="Spring fund / IO number">' +
+        '</div>' +
+      '</div>' +
       '<div class="response-msg"></div>';
+
+    var statusSelect = form.querySelector('[name="status"]');
+    var fundingFields = form.querySelector('.funding-fields');
+    var periodSelect = form.querySelector('[name="periodType"]');
+    var fund1Input = form.querySelector('[name="fund1"]');
+    var fund2Input = form.querySelector('[name="fund2"]');
+
+    statusSelect.addEventListener('change', function () {
+      if (statusSelect.value === 'Student accepted') {
+        fundingFields.style.display = '';
+        updateFundLabels();
+      } else {
+        fundingFields.style.display = 'none';
+      }
+    });
+
+    periodSelect.addEventListener('change', updateFundLabels);
+
+    function updateFundLabels() {
+      if (periodSelect.value === 'Summer') {
+        fund1Input.placeholder = '1st Half Summer fund / IO number';
+        fund2Input.placeholder = '2nd Half Summer fund / IO number';
+      } else {
+        fund1Input.placeholder = 'Fall fund / IO number';
+        fund2Input.placeholder = 'Spring fund / IO number';
+      }
+    }
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       var faculty = form.querySelector('[name="faculty"]').value;
-      var status = form.querySelector('[name="status"]').value;
+      var status = statusSelect.value;
       if (!faculty || !status) return;
 
       var btn = form.querySelector('.response-submit');
@@ -143,17 +185,37 @@
         status: status
       });
 
-      fetch(SCRIPT_URL + '?' + params.toString())
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-          if (data.success) {
+      var statusPromise = fetch(SCRIPT_URL + '?' + params.toString())
+        .then(function (r) { return r.json(); });
+
+      var placementPromise;
+      if (status === 'Student accepted') {
+        var placementParams = new URLSearchParams({
+          action: 'submitPlacement',
+          studentEmail: studentEmail,
+          studentName: studentName,
+          facultyName: faculty,
+          periodType: periodSelect.value,
+          fund1: fund1Input.value,
+          fund2: fund2Input.value
+        });
+        placementPromise = fetch(SCRIPT_URL + '?' + placementParams.toString())
+          .then(function (r) { return r.json(); });
+      } else {
+        placementPromise = Promise.resolve({ success: true });
+      }
+
+      Promise.all([statusPromise, placementPromise])
+        .then(function (results) {
+          if (results[0].success && results[1].success) {
             msg.className = 'response-msg response-msg--ok';
             msg.textContent = 'Saved.';
             form.reset();
+            fundingFields.style.display = 'none';
             loadResponses();
           } else {
             msg.className = 'response-msg response-msg--err';
-            msg.textContent = data.error || 'Something went wrong.';
+            msg.textContent = results[0].error || results[1].error || 'Something went wrong.';
           }
         })
         .catch(function () {

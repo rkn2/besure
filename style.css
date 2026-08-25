@@ -485,6 +485,7 @@ input[type="file"] { font-size: 0.9rem; }
 
 .response-status--interested { background: var(--warning-bg); color: #856404; }
 .response-status--offered { background: var(--success-bg); color: var(--success); }
+.response-status--confirmed { background: var(--navy); color: var(--hero-text); }
 .response-status--declined { background: var(--error-bg); color: var(--error); }
 .response-status--default { background: var(--sand); color: var(--text-secondary); }
 

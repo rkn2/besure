@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>AE Research Scholars — Placements &amp; Funding</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@300;400;500;600;900&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.placements-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+}
+.placements-table th,
+.placements-table td {
+  text-align: left;
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+}
+.placements-table th {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  font-weight: 600;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.placements-table tr:hover td {
+  background: var(--sand);
+}
+.placements-table td.fund {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.85rem;
+}
+.table-wrap {
+  overflow-x: auto;
+}
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+.loading {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-secondary);
+}
+.refresh-btn {
+  margin-left: 1rem;
+}
+</style>
+</head>
+<body>
+
+<header class="hero hero--compact" style="border-bottom:2px solid var(--hero-accent);">
+  <div class="hero-inner">
+    <p class="hero-eyebrow">AE Research Scholars</p>
+    <h1>Placements &amp; Funding</h1>
+  </div>
+</header>
+
+<section class="section">
+  <div class="section-inner">
+    <p style="margin-bottom:0.5rem;color:var(--text-secondary);">
+      Confirmed student placements and the funding sources faculty have designated for each period.
+    </p>
+    <p style="margin-bottom:1.5rem;">
+      <button class="btn btn-secondary" onclick="loadPlacements()" style="font-size:0.82rem;padding:0.35rem 0.8rem;">Refresh</button>
+    </p>
+
+    <div class="table-wrap">
+      <div id="placements-content">
+        <p class="loading">Loading placements...</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <p>AE Research Scholars Program &middot; Department of Architectural Engineering &middot; Penn State</p>
+</footer>
+
+<script>
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxl3x4KWmjHufkroWiXieWjBcACjWxSguj9EjonvpSxPDfVUYhfg88uhnVjRMhXuAJx/exec';
+
+function loadPlacements() {
+  var container = document.getElementById('placements-content');
+  container.innerHTML = '<p class="loading">Loading placements...</p>';
+
+  fetch(SCRIPT_URL + '?action=placements')
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (!data.length) {
+        container.innerHTML = '<p class="empty-state">No confirmed placements yet.</p>';
+        return;
+      }
+
+      var rows = [];
+      data.forEach(function (p) {
+        var p1Fund = p['Period 1 Fund'] || '';
+        var p2Fund = p['Period 2 Fund'] || '';
+        if (p1Fund || p2Fund) {
+          rows.push({
+            student: p['Student Name'],
+            email: p['Student Email'],
+            faculty: p['Faculty Name'],
+            period1Label: p['Period 1 Label'],
+            period1Fund: p1Fund,
+            period2Label: p['Period 2 Label'],
+            period2Fund: p2Fund
+          });
+        }
+      });
+
+      if (!rows.length) {
+        container.innerHTML = '<p class="empty-state">No funding information entered yet.</p>';
+        return;
+      }
+
+      var html = '<table class="placements-table">' +
+        '<thead><tr>' +
+          '<th>Student</th>' +
+          '<th>PI</th>' +
+          '<th>Period 1</th>' +
+          '<th>Fund / IO</th>' +
+          '<th>Period 2</th>' +
+          '<th>Fund / IO</th>' +
+        '</tr></thead><tbody>';
+
+      rows.forEach(function (r) {
+        html += '<tr>' +
+          '<td>' + escapeHtml(r.student) + '<br><span style="font-size:0.78rem;color:var(--text-secondary);">' + escapeHtml(r.email) + '</span></td>' +
+          '<td>' + escapeHtml(r.faculty) + '</td>' +
+          '<td>' + escapeHtml(r.period1Label) + '</td>' +
+          '<td class="fund">' + (r.period1Fund ? escapeHtml(r.period1Fund) : '<span style="color:var(--text-secondary);">—</span>') + '</td>' +
+          '<td>' + escapeHtml(r.period2Label) + '</td>' +
+          '<td class="fund">' + (r.period2Fund ? escapeHtml(r.period2Fund) : '<span style="color:var(--text-secondary);">—</span>') + '</td>' +
+        '</tr>';
+      });
+
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    })
+    .catch(function () {
+      container.innerHTML = '<p class="empty-state" style="color:var(--error);">Could not load placements. Check that the Apps Script is deployed.</p>';
+    });
+}
+
+function escapeHtml(str) {
+  var d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+loadPlacements();
+</script>
+</body>
+</html>
