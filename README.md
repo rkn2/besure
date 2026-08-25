@@ -87,17 +87,9 @@ Faculty get a link like `https://rkn2.github.io/besure/view/random-slug/` — no
 | Rob Leicht | Construction |
 | Juan Pablo Gevaudan | Construction |
 
-## Local Flask admin (optional)
+## Admin tools
 
-For tracking placements, funding, and generating welcome/payroll emails:
-
-```
-cd admin
-source venv/bin/activate
-FLASK_DEBUG=1 python app.py
-```
-
-Admin dashboard at `http://localhost:5050/admin` (password: `changeme` in dev mode).
+Admin tools (matching script, Flask dashboard, email templates) live in the private repo: [besure-admin](https://github.com/rkn2/besure-admin)
 
 Pipeline: emailed → confirmed with faculty → confirmed with student
 
@@ -105,5 +97,6 @@ Funding tracked per semester with separate source label and IO number fields. Pa
 
 ## TODO
 
-- [ ] Create Google Form and plug in form URL in `apply.html`
+- [ ] **Create Google Form** with the 12 fields listed above and plug the URL into `apply.html`
+- [ ] **Faculty response tracking on cohort pages** — let faculty indicate interest directly on the student pages (e.g., write their name + status: "emailed student", "offered position", "did not offer position") so other faculty can see who is still available vs already claimed. Could be a simple form on each cohort page that writes back to a shared sheet or updates the page.
 - [ ] Decide on private hosting for cohort pages (public repo means `view/` is browsable — URLs are unguessable but not truly private)
