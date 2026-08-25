@@ -106,13 +106,16 @@ function handleSubmitPlacement(e) {
                  'Period 1 Label', 'Period 1 Fund', 'Period 2 Label', 'Period 2 Fund'];
   var sheet = getOrCreateSheet(PLACEMENT_SHEET, headers);
 
-  var label1, label2;
-  if (periodType === 'Academic Year') {
-    label1 = 'Fall';
-    label2 = 'Spring';
-  } else {
-    label1 = '1st Half Summer';
-    label2 = '2nd Half Summer';
+  var label1 = (e.parameter.label1 || '').trim();
+  var label2 = (e.parameter.label2 || '').trim();
+  if (!label1) {
+    if (periodType === 'Academic Year') {
+      label1 = 'Fall';
+      label2 = 'Spring';
+    } else {
+      label1 = '1st Half Summer';
+      label2 = '2nd Half Summer';
+    }
   }
 
   // Upsert by (studentEmail, facultyName)

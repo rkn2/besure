@@ -29,6 +29,25 @@
 
   var pageSlug = location.pathname.split('/').filter(Boolean).pop() || '';
 
+  // Read semester from page (e.g., "Fall 2026") to compute period labels with years
+  var semesterEl = document.querySelector('.hero-eyebrow');
+  var semesterText = semesterEl ? semesterEl.textContent.trim() : '';
+  var semesterMatch = semesterText.match(/(Fall|Spring|Summer)\s+(\d{4})/i);
+  var cohortSeason = semesterMatch ? semesterMatch[1] : '';
+  var cohortYear = semesterMatch ? parseInt(semesterMatch[2], 10) : 0;
+  var yy = cohortYear % 100;
+
+  function getPeriodLabels(periodType) {
+    if (!cohortYear) return periodType === 'Academic Year'
+      ? ['Fall', 'Spring'] : ['Summer 1st Half', 'Summer 2nd Half'];
+    if (periodType === 'Academic Year') {
+      if (/spring/i.test(cohortSeason)) return ['Spring ' + yy, 'Fall ' + yy];
+      return ['Fall ' + yy, 'Spring ' + ((yy + 1) % 100)];
+    }
+    var sy = /fall/i.test(cohortSeason) ? (yy + 1) % 100 : yy;
+    return ['Summer ' + sy + ' 1st Half', 'Summer ' + sy + ' 2nd Half'];
+  }
+
   if (!pageSlug || SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL') {
     showUnavailable();
     return;
@@ -157,13 +176,9 @@
     periodSelect.addEventListener('change', updateFundLabels);
 
     function updateFundLabels() {
-      if (periodSelect.value === 'Summer') {
-        fund1Input.placeholder = '1st Half Summer — e.g., BESURE';
-        fund2Input.placeholder = '2nd Half Summer — e.g., IO number';
-      } else {
-        fund1Input.placeholder = 'Fall — e.g., BESURE';
-        fund2Input.placeholder = 'Spring — e.g., IO number';
-      }
+      var labels = getPeriodLabels(periodSelect.value);
+      fund1Input.placeholder = labels[0] + ' — e.g., BESURE';
+      fund2Input.placeholder = labels[1] + ' — e.g., IO number';
     }
 
     form.addEventListener('submit', function (e) {
@@ -191,12 +206,15 @@
 
       var placementPromise;
       if (status === 'Student accepted') {
+        var labels = getPeriodLabels(periodSelect.value);
         var placementParams = new URLSearchParams({
           action: 'submitPlacement',
           studentEmail: studentEmail,
           studentName: studentName,
           facultyName: faculty,
           periodType: periodSelect.value,
+          label1: labels[0],
+          label2: labels[1],
           fund1: fund1Input.value,
           fund2: fund2Input.value
         });
