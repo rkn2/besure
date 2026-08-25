@@ -24,6 +24,9 @@ function doGet(e) {
   if (action === 'submitPlacement') {
     return handleSubmitPlacement(e);
   }
+  if (action === 'timestamps') {
+    return handleTimestamps();
+  }
 
   var page = (e.parameter.page || '').trim();
   if (!page) {
@@ -139,6 +142,40 @@ function handleSubmitPlacement(e) {
   }
 
   return ContentService.createTextOutput(JSON.stringify({ success: true }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function handleTimestamps() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheets()[0];
+  var data = sheet.getDataRange().getValues();
+  if (data.length < 2) {
+    return ContentService.createTextOutput(JSON.stringify({}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  var headers = data[0].map(function(h) { return h.toString().toLowerCase().trim(); });
+  var tsCol = -1, emailCol = -1;
+  for (var j = 0; j < headers.length; j++) {
+    if (headers[j] === 'timestamp') tsCol = j;
+    if (headers[j].indexOf('email') !== -1) emailCol = j;
+  }
+
+  if (tsCol === -1 || emailCol === -1) {
+    return ContentService.createTextOutput(JSON.stringify({}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  var result = {};
+  for (var i = 1; i < data.length; i++) {
+    var email = (data[i][emailCol] || '').toString().trim().toLowerCase();
+    var ts = data[i][tsCol];
+    if (email && ts) {
+      result[email] = ts instanceof Date ? ts.toISOString() : ts.toString();
+    }
+  }
+
+  return ContentService.createTextOutput(JSON.stringify(result))
     .setMimeType(ContentService.MimeType.JSON);
 }
 

@@ -58,7 +58,8 @@
 
   var students = [];
   cards.forEach(function (card) {
-    var name = (card.querySelector('h3') || {}).textContent || '';
+    var h3 = card.querySelector('h3');
+    var name = h3 ? h3.childNodes[0].textContent : '';
     var meta = (card.querySelector('.meta') || {}).textContent || '';
     var email = meta.split('·')[0].trim();
     students.push({ card: card, name: name.trim(), email: email });

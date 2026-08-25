@@ -253,14 +253,34 @@
     var prefHtml = s.facultyPref ? '<div class="description" style="color:var(--text-secondary);font-style:italic;">Faculty preference: ' + escapeHtml(s.facultyPref) + '</div>' : '';
     var resumeHtml = s.resume ? '<div class="resume-link"><a href="' + s.resume + '" target="_blank" class="btn btn-secondary" style="font-size:0.82rem;padding:0.35rem 0.8rem;margin-top:0.4rem;">View Resume (PDF)</a></div>' : '';
 
+    var appliedHtml = s.applied ? ' &middot; Applied ' + escapeHtml(s.applied) : '';
+
     card.innerHTML =
       '<h3>' + escapeHtml(s.name) + '<span class="badge-requested" style="display:none;">Requested you</span></h3>' +
-      '<div class="meta">' + escapeHtml(s.email) + ' &middot; Graduating ' + s.gradYear + ' &middot; ' + escapeHtml(s.major) + '</div>' +
+      '<div class="meta">' + escapeHtml(s.email) + ' &middot; Graduating ' + s.gradYear + ' &middot; ' + escapeHtml(s.major) + appliedHtml + '</div>' +
       '<div class="interests">' + badgesHtml + '</div>' +
       descHtml + prefHtml + resumeHtml;
 
     studentList.appendChild(card);
   });
+
+  // Fetch application dates from form responses sheet
+  fetch('https://script.google.com/macros/s/AKfycbxl3x4KWmjHufkroWiXieWjBcACjWxSguj9EjonvpSxPDfVUYhfg88uhnVjRMhXuAJx/exec?action=timestamps')
+    .then(function (r) { return r.json(); })
+    .then(function (timestamps) {
+      var cards = studentList.querySelectorAll('.student-card');
+      cards.forEach(function (card) {
+        var email = card.dataset.email.toLowerCase();
+        var ts = timestamps[email];
+        if (ts) {
+          var d = new Date(ts);
+          var formatted = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+          var meta = card.querySelector('.meta');
+          if (meta) meta.innerHTML += ' &middot; Applied ' + escapeHtml(formatted);
+        }
+      });
+    })
+    .catch(function () {});
 
   // Set initial state: show all
   setAllActive();
