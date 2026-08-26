@@ -73,7 +73,7 @@ All faculty get the same link — `https://rkn2.github.io/besure/view/` — sele
 - **High interest only** for option cohort assignment (Moderate/Low/None excluded)
 - Students who name a specific faculty member get a dedicated page + email for that faculty
 - Students with zero high-interest options AND no named faculty are flagged for manual review
-- Citizenship field is never shown on faculty-facing pages
+- Citizenship is available as a filter checkbox on faculty-facing pages (not shown on individual cards)
 
 ## Faculty roster
 
@@ -84,6 +84,7 @@ All faculty get the same link — `https://rkn2.github.io/besure/view/` — sele
 | Yuqing Hu | Mechanical/Energy, Construction |
 | Greg Pavlak | Mechanical/Energy |
 | Wangda Zuo | Mechanical/Energy |
+| Jin Wen | Mechanical/Energy |
 | Donghyun Rim | Mechanical/Energy |
 | Julian Wang | Lighting/Electrical |
 | Dorukalp Durmus | Lighting/Electrical |

@@ -11,6 +11,7 @@
     'Yuqing Hu',
     'Greg Pavlak',
     'Wangda Zuo',
+    'Jin Wen',
     'Donghyun Rim',
     'Julian Wang',
     'Dorukalp Durmus',
