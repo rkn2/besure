@@ -8,6 +8,8 @@
   var FACULTY = [
     'Nathan Brown',
     'Rebecca Napolitano',
+    'Tyler Hull',
+    'Botong Zheng',
     'Yuqing Hu',
     'Greg Pavlak',
     'Wangda Zuo',

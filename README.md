@@ -81,6 +81,8 @@ All faculty get the same link — `https://rkn2.github.io/besure/view/` — sele
 |---|---|
 | Nathan Brown | Structures |
 | Rebecca Napolitano | Structures |
+| Tyler Hull | Structures |
+| Botong Zheng | Structures |
 | Yuqing Hu | Mechanical/Energy, Construction |
 | Greg Pavlak | Mechanical/Energy |
 | Wangda Zuo | Mechanical/Energy |
