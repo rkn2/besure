@@ -101,4 +101,10 @@ Funding tracked per semester with separate source label and IO number fields. Pa
 
 ## Faculty response tracking
 
-Each student card includes a form where faculty can indicate their interest (Interested / Emailed student / Offered position / Did not offer position). Responses are stored via a Google Apps Script web app in the "Faculty Responses" tab of the linked Google Sheet. The Apps Script source is in `apps-script.js` for reference; the deployed URL is configured in `response-tracking.js`.
+Each student card includes a form where faculty can indicate their interest (Interested / Emailed student / Offered position / Student accepted / Did not offer position). When a faculty member selects "Student accepted," a funding form appears for them to enter period type (Academic Year or Summer) and fund/IO numbers for each half. Responses are stored via a Google Apps Script web app in the "Faculty Responses" and "Placements" tabs of the linked Google Sheet. The Apps Script source is in `apps-script.js` for reference; the deployed URL is configured in `response-tracking.js`.
+
+## TODO
+
+- [ ] Consider custom subdomain (e.g., `scholars.ae.psu.edu`) — requires CNAME from dept IT pointing to `rkn2.github.io`, then configure in GitHub Pages settings
+- [ ] Consider private hosting for cohort pages (currently public repo with unguessable URLs — fine for now)
+- [ ] Update `generate_cohorts.py` template in `besure-admin` when adding new features to cohort page
