@@ -27,7 +27,8 @@
     'Emailed student',
     'Offered position',
     'Student accepted',
-    'Did not offer position'
+    'Doing paperwork',
+    'Program accepted'
   ];
 
   var pageSlug = location.pathname.split('/').filter(Boolean).pop() || '';
@@ -111,10 +112,11 @@
       item.className = 'response-item';
       var statusClass = 'response-status--default';
       var s = (r['Status'] || '').toLowerCase();
-      if (s === 'student accepted') statusClass = 'response-status--confirmed';
+      if (s === 'program accepted') statusClass = 'response-status--program';
+      else if (s === 'doing paperwork') statusClass = 'response-status--paperwork';
+      else if (s === 'student accepted') statusClass = 'response-status--confirmed';
       else if (s === 'offered position') statusClass = 'response-status--offered';
       else if (s === 'interested' || s === 'emailed student') statusClass = 'response-status--interested';
-      else if (s === 'did not offer position') statusClass = 'response-status--declined';
       item.innerHTML =
         '<span class="response-faculty">' + escapeHtml(r['Faculty Name']) + '</span>' +
         '<span class="response-status ' + statusClass + '">' + escapeHtml(r['Status']) + '</span>';

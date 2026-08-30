@@ -493,8 +493,18 @@ input[type="file"] { font-size: 0.9rem; }
 .response-status--interested { background: var(--warning-bg); color: #856404; }
 .response-status--offered { background: var(--success-bg); color: var(--success); }
 .response-status--confirmed { background: var(--navy); color: var(--hero-text); }
-.response-status--declined { background: var(--error-bg); color: var(--error); }
+.response-status--paperwork { background: #e8d5f5; color: #6b21a8; }
+.response-status--program { background: #065f46; color: #ffffff; }
 .response-status--default { background: var(--sand); color: var(--text-secondary); }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .response-status--paperwork { background: #3b0764; color: #e8d5f5; }
+  :root:not([data-theme="light"]) .response-status--program { background: #064e3b; color: #d1fae5; }
+  :root:not([data-theme="light"]) .response-status--interested { color: #fbbf24; }
+}
+:root[data-theme="dark"] .response-status--paperwork { background: #3b0764; color: #e8d5f5; }
+:root[data-theme="dark"] .response-status--program { background: #064e3b; color: #d1fae5; }
+:root[data-theme="dark"] .response-status--interested { color: #fbbf24; }
 
 .response-form-label {
   font-size: 0.82rem;
