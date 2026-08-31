@@ -9,8 +9,8 @@
 //   and creates an onboarding draft in the psuaeresearchscholars Gmail.
 //
 //   Setup:
-//   1. In psuaeresearchscholars@gmail.com, create a label "BESURE-Accept"
-//   2. Create a filter: to:psuaeresearchscholars@gmail.com → apply label "BESURE-Accept"
+//   1. In psuaeresearchscholars@gmail.com, create a label "aers-accept"
+//   2. Create a filter: from:rjn5308@psu.edu → apply label "aers-accept"
 //   3. In Apps Script, go to Triggers (clock icon) → Add Trigger:
 //      Function: processAcceptanceEmails, Time-driven, Minutes timer, Every 5 minutes
 
@@ -215,7 +215,7 @@ function handleReadPlacements() {
 
 var ADMIN_EMAIL = 'rjn5308@psu.edu';
 var FINANCE_EMAIL = 'ldw5@psu.edu';
-var ACCEPT_LABEL = 'BESURE-Accept';
+var ACCEPT_LABEL = 'aers-accept';
 
 var FACULTY_EMAILS = {
   'Nathan Brown': 'ncb5048@psu.edu',
