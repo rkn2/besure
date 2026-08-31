@@ -11,7 +11,7 @@
   var FACULTY_EMAILS = {
     'Nathan Brown': 'ncb5048@psu.edu',
     'Rebecca Napolitano': ADMIN_EMAIL,
-    'Tyler Hull': '',
+    'Tyler Hull': 'thull@psu.edu',
     'Botong Zheng': 'bbz5226@psu.edu',
     'Yuqing Hu': 'yfh5204@psu.edu',
     'Greg Pavlak': 'gxp93@psu.edu',
@@ -240,7 +240,8 @@
             msg.className = 'response-msg response-msg--ok';
             var mailtoUrl = '';
             if (status === 'Student accepted') {
-              mailtoUrl = buildOnboardingMailto(studentName, studentEmail, faculty);
+              var labels = getPeriodLabels(periodSelect.value);
+              mailtoUrl = buildOnboardingMailto(studentName, studentEmail, faculty, labels[0], fund1Input.value, labels[1], fund2Input.value);
             } else if (status === 'Program accepted') {
               mailtoUrl = buildCongratsMailto(studentName, studentEmail, faculty);
             }
@@ -282,17 +283,20 @@
     });
   }
 
-  function buildOnboardingMailto(studentName, studentEmail, facultyName) {
+  function buildOnboardingMailto(studentName, studentEmail, facultyName, label1, fund1, label2, fund2) {
     var piEmail = FACULTY_EMAILS[facultyName] || '';
     var to = [ADMIN_EMAIL, FINANCE_EMAIL].join(',');
     var cc = [piEmail, studentEmail].filter(Boolean).join(',');
-    var subject = 'AE Research Scholars — Onboarding for ' + studentName;
-    var body = 'Hi Trisha,\r\n\r\n' +
-      studentName + ' has been matched with Dr. ' + facultyName.split(' ').pop() +
-      ' through the AE Research Scholars program. Could you please help get them set up in Workday?\r\n\r\n' +
-      studentName + ', please look out for emails from Trisha regarding your appointment paperwork. ' +
-      'Please do not start working until you have confirmation that your appointment is active and you are on payroll.\r\n\r\n' +
-      'Thank you,\r\nBecca';
+    var subject = 'New AE Research Scholar Payroll Information';
+    var fundLine1 = fund1 ? ('    •    Funding Source 1: ' + label1 + ' on IO ' + fund1) : ('    •    Funding Source 1: ' + label1 + ' — TBD');
+    var fundLine2 = fund2 ? ('    •    Funding Source 2: ' + label2 + ' on IO ' + fund2) : ('    •    Funding Source 2: ' + label2 + ' — TBD');
+    var body = 'Hi Latrisha, this email is to confirm the payroll details for our new student researcher:\r\n\r\n' +
+      '    •    Student: ' + studentName + '\r\n' +
+      '    •    Faculty Mentor/Supervisor: ' + facultyName + ' (They will be responsible for approving their hours).\r\n' +
+      fundLine1 + '\r\n' +
+      fundLine2 + '\r\n\r\n' +
+      'Please let me know if you need any additional information to get them set up in the system!\r\n\r\n' +
+      'Thanks,\r\nBecca';
     return 'mailto:' + encodeURIComponent(to) +
       '?cc=' + encodeURIComponent(cc) +
       '&subject=' + encodeURIComponent(subject) +
@@ -302,11 +306,25 @@
   function buildCongratsMailto(studentName, studentEmail, facultyName) {
     var piEmail = FACULTY_EMAILS[facultyName] || '';
     var cc = [ADMIN_EMAIL, piEmail].filter(Boolean).join(',');
-    var subject = 'Congratulations — AE Research Scholars Appointment Official';
-    var body = 'Hi ' + studentName.split(' ')[0] + ',\r\n\r\n' +
-      'Congratulations! Your AE Research Scholars appointment with Dr. ' + facultyName.split(' ').pop() +
-      ' is now official. I will be adding you to the Teams channel shortly.\r\n\r\n' +
-      'Welcome aboard!\r\nBecca';
+    var firstName = studentName.split(' ')[0];
+    var subject = 'Welcome to the AE Research Scholars Program!';
+    var body = 'Dear ' + firstName + ',\r\n\r\n' +
+      'Welcome to the AE Research Scholars program! We are thrilled to have you join us!!\r\n\r\n' +
+      'To help you get started and stay connected, we have added you to the official AE Research Scholars channel on Microsoft Teams. ' +
+      'This channel is our primary hub for communication, where we post important information about graduate school fellowships, ' +
+      'research scholarships, professional development events, and other opportunities relevant to your academic and research career!\r\n\r\n' +
+      'A key component of the program is sharing your work with the broader community. To that end, all student researchers participate ' +
+      'in a poster session at the end of each year (April) to present their progress and accomplishments. We will share more details ' +
+      'about the poster session as the end of the semester approaches.\r\n\r\n' +
+      'The position pays $15/hour, and the average time commitment is about 5 hours per week, though some students work up to 10 hours. ' +
+      'This is something you and your faculty mentor can decide together based on your project and schedule. Please note that you must ' +
+      'wait until you are officially in the university system before starting any work. Latrisha Hough will send you instructions on how ' +
+      'to apply for the paid research position through the university system, please keep an eye out for her email.\r\n\r\n' +
+      'In terms of research mentoring and meetings, your faculty mentor is your primary contact. Some students meet weekly, others monthly, ' +
+      'and some prefer quick check-ins via Teams. Have a conversation with your mentor about what works best for both of you and your project. ' +
+      'If you run into any issues with this, please reach back out to me, I\'m happy to help.\r\n\r\n' +
+      'We are looking forward to seeing the great work you will do with your faculty mentor! Please don\'t hesitate to reach out if you have any questions.\r\n\r\n' +
+      'Best regards,\r\nDoc Nap';
     return 'mailto:' + encodeURIComponent(studentEmail) +
       '?cc=' + encodeURIComponent(cc) +
       '&subject=' + encodeURIComponent(subject) +

@@ -2,14 +2,15 @@
 // Sheet 1: "Faculty Responses" — interest/status tracking
 // Sheet 2: "Placements" — confirmed hires with funding
 //
-// Email-triggered acceptance:
-//   Forward an email with subject "BESURE ACCEPT: Student Name / PI Name"
-//   Gmail filter applies the BESURE-Accept label, processAcceptanceEmails()
-//   picks it up, updates the sheet, and creates an onboarding draft.
+// Email-triggered acceptance (runs under psuaeresearchscholars@gmail.com):
+//   Forward an acceptance email to psuaeresearchscholars@gmail.com.
+//   Type "Student Name / PI Name" on the first line of the body.
+//   The script picks it up, updates the sheet to "Student accepted",
+//   and creates an onboarding draft in the psuaeresearchscholars Gmail.
 //
 //   Setup:
-//   1. In Gmail, create a label called "BESURE-Accept"
-//   2. Create a filter: subject matches "BESURE ACCEPT:" → apply label "BESURE-Accept", skip inbox
+//   1. In psuaeresearchscholars@gmail.com, create a label "BESURE-Accept"
+//   2. Create a filter: to:psuaeresearchscholars@gmail.com → apply label "BESURE-Accept"
 //   3. In Apps Script, go to Triggers (clock icon) → Add Trigger:
 //      Function: processAcceptanceEmails, Time-driven, Minutes timer, Every 5 minutes
 
@@ -219,7 +220,7 @@ var ACCEPT_LABEL = 'BESURE-Accept';
 var FACULTY_EMAILS = {
   'Nathan Brown': 'ncb5048@psu.edu',
   'Rebecca Napolitano': 'rjn5308@psu.edu',
-  'Tyler Hull': '',
+  'Tyler Hull': 'thull@psu.edu',
   'Botong Zheng': 'bbz5226@psu.edu',
   'Yuqing Hu': 'yfh5204@psu.edu',
   'Greg Pavlak': 'gxp93@psu.edu',
@@ -245,15 +246,25 @@ function processAcceptanceEmails() {
   var data = sheet.getDataRange().getValues();
 
   threads.forEach(function(thread) {
-    var subject = thread.getFirstMessageSubject();
-    // Strip "Fwd:" / "Re:" prefixes
-    var clean = subject.replace(/^(?:(?:Fwd|Re|Fw)\s*:\s*)+/i, '');
-    var match = clean.match(/BESURE\s+ACCEPT\s*:\s*(.+?)\s*\/\s*(.+)/i);
+    var messages = thread.getMessages();
+    var latest = messages[messages.length - 1];
+    var body = latest.getPlainBody() || '';
+    // Grab the first non-empty line the sender typed (before forwarded content)
+    var lines = body.split(/\r?\n/);
+    var firstLine = '';
+    for (var li = 0; li < lines.length; li++) {
+      var trimmed = lines[li].trim();
+      if (trimmed && !/^[-=_>]/.test(trimmed) && !/^(from|sent|to|cc|subject|date):/i.test(trimmed)) {
+        firstLine = trimmed;
+        break;
+      }
+    }
+    var match = firstLine.match(/^(.+?)\s*\/\s*(.+)$/);
 
     if (!match) {
-      thread.getMessages()[0].reply(
-        'Could not parse names from subject.\n' +
-        'Expected format: BESURE ACCEPT: Student Name / PI Name');
+      latest.reply(
+        'Could not parse names.\n' +
+        'Type "Student Name / PI Name" on the first line when forwarding.');
       label.removeFromThread(thread);
       return;
     }
@@ -288,24 +299,47 @@ function processAcceptanceEmails() {
     sheet.getRange(foundRow + 1, 1).setValue(new Date());
     sheet.getRange(foundRow + 1, 6).setValue('Student accepted');
 
-    createOnboardingDraft(studentName, studentEmail, piName);
+    var funding = lookupFunding(studentEmail, piName);
+    createOnboardingDraft(studentName, studentEmail, piName, funding);
     label.removeFromThread(thread);
   });
 }
 
-function createOnboardingDraft(studentName, studentEmail, piName) {
-  var piEmail = FACULTY_EMAILS[piName] || '';
-  var piLastName = piName.split(' ').pop();
+function lookupFunding(studentEmail, facultyName) {
+  var headers = ['Timestamp', 'Student Name', 'Student Email', 'Faculty Name', 'Period Type',
+                 'Period 1 Label', 'Period 1 Fund', 'Period 2 Label', 'Period 2 Fund'];
+  var sheet = getOrCreateSheet(PLACEMENT_SHEET, headers);
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][2] === studentEmail && data[i][3] === facultyName) {
+      return {
+        label1: data[i][5] || '', fund1: data[i][6] || '',
+        label2: data[i][7] || '', fund2: data[i][8] || ''
+      };
+    }
+  }
+  return { label1: '', fund1: '', label2: '', fund2: '' };
+}
 
-  var subject = 'AE Research Scholars — Onboarding for ' + studentName;
-  var body = 'Hi Trisha,\n\n' +
-    studentName + ' has been matched with Dr. ' + piLastName +
-    ' through the AE Research Scholars program. Could you please help get them set up in Workday?\n\n' +
-    studentName + ', please look out for emails from Trisha regarding your appointment paperwork. ' +
-    'Please do not start working until you have confirmation that your appointment is active and you are on payroll.\n\n' +
-    'Thank you,\nBecca';
+function createOnboardingDraft(studentName, studentEmail, piName, funding) {
+  var piEmail = FACULTY_EMAILS[piName] || '';
+  var fundLine1 = funding.fund1
+    ? ('    •    Funding Source 1: ' + funding.label1 + ' on IO ' + funding.fund1)
+    : ('    •    Funding Source 1: TBD');
+  var fundLine2 = funding.fund2
+    ? ('    •    Funding Source 2: ' + funding.label2 + ' on IO ' + funding.fund2)
+    : ('    •    Funding Source 2: TBD');
+
+  var subject = 'New AE Research Scholar Payroll Information';
+  var body = 'Hi Latrisha, this email is to confirm the payroll details for our new student researcher:\n\n' +
+    '    •    Student: ' + studentName + '\n' +
+    '    •    Faculty Mentor/Supervisor: ' + piName + ' (They will be responsible for approving their hours).\n' +
+    fundLine1 + '\n' +
+    fundLine2 + '\n\n' +
+    'Please let me know if you need any additional information to get them set up in the system!\n\n' +
+    'Thanks,\nBecca';
 
   var cc = [piEmail, studentEmail].filter(function(e) { return e; }).join(',');
 
-  GmailApp.createDraft(FINANCE_EMAIL, subject, body, { cc: cc, from: ADMIN_EMAIL });
+  GmailApp.createDraft(FINANCE_EMAIL, subject, body, { cc: cc });
 }
