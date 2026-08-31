@@ -552,6 +552,14 @@ input[type="file"] { font-size: 0.9rem; }
 .response-msg--ok { color: var(--success); }
 .response-msg--err { color: var(--error); }
 
+.draft-email-btn {
+  margin-left: 0.5rem;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.78rem;
+  vertical-align: baseline;
+  text-decoration: none;
+}
+
 @media (max-width: 600px) {
   .response-form-row { flex-direction: column; }
   .response-select { min-width: 100%; }

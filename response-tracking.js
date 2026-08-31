@@ -5,22 +5,26 @@
 (function () {
   var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxl3x4KWmjHufkroWiXieWjBcACjWxSguj9EjonvpSxPDfVUYhfg88uhnVjRMhXuAJx/exec';
 
-  var FACULTY = [
-    'Nathan Brown',
-    'Rebecca Napolitano',
-    'Tyler Hull',
-    'Botong Zheng',
-    'Yuqing Hu',
-    'Greg Pavlak',
-    'Wangda Zuo',
-    'Jin Wen',
-    'Donghyun Rim',
-    'Julian Wang',
-    'Dorukalp Durmus',
-    'John Messner',
-    'Rob Leicht',
-    'Juan Pablo Gevaudan'
-  ];
+  var ADMIN_EMAIL = 'rjn5308@psu.edu';
+  var FINANCE_EMAIL = 'ldw5@psu.edu';
+
+  var FACULTY_EMAILS = {
+    'Nathan Brown': 'ncb5048@psu.edu',
+    'Rebecca Napolitano': ADMIN_EMAIL,
+    'Tyler Hull': '',
+    'Botong Zheng': 'bbz5226@psu.edu',
+    'Yuqing Hu': 'yfh5204@psu.edu',
+    'Greg Pavlak': 'gxp93@psu.edu',
+    'Wangda Zuo': 'wangda.zuo@psu.edu',
+    'Jin Wen': 'jvw6499@psu.edu',
+    'Donghyun Rim': 'dxr51@psu.edu',
+    'Julian Wang': 'jqw5965@psu.edu',
+    'Dorukalp Durmus': 'alp@psu.edu',
+    'John Messner': 'jim101@psu.edu',
+    'Rob Leicht': 'rml167@psu.edu',
+    'Juan Pablo Gevaudan': 'j.p.gevaudan@psu.edu'
+  };
+  var FACULTY = Object.keys(FACULTY_EMAILS);
 
   var STATUSES = [
     'Interested',
@@ -234,7 +238,17 @@
         .then(function (results) {
           if (results[0].success && results[1].success) {
             msg.className = 'response-msg response-msg--ok';
-            msg.textContent = 'Saved.';
+            var mailtoUrl = '';
+            if (status === 'Student accepted') {
+              mailtoUrl = buildOnboardingMailto(studentName, studentEmail, faculty);
+            } else if (status === 'Program accepted') {
+              mailtoUrl = buildCongratsMailto(studentName, studentEmail, faculty);
+            }
+            if (mailtoUrl) {
+              msg.innerHTML = 'Saved. <a href="' + mailtoUrl + '" class="btn btn-primary draft-email-btn">Draft email</a>';
+            } else {
+              msg.textContent = 'Saved.';
+            }
             form.reset();
             fundingFields.style.display = 'none';
             loadResponses();
@@ -266,6 +280,37 @@
       note.innerHTML = '<p class="response-unavailable">Faculty response tracking is not yet configured.</p>';
       card.appendChild(note);
     });
+  }
+
+  function buildOnboardingMailto(studentName, studentEmail, facultyName) {
+    var piEmail = FACULTY_EMAILS[facultyName] || '';
+    var to = [ADMIN_EMAIL, FINANCE_EMAIL].join(',');
+    var cc = [piEmail, studentEmail].filter(Boolean).join(',');
+    var subject = 'AE Research Scholars — Onboarding for ' + studentName;
+    var body = 'Hi Trisha,\r\n\r\n' +
+      studentName + ' has been matched with Dr. ' + facultyName.split(' ').pop() +
+      ' through the AE Research Scholars program. Could you please help get them set up in Workday?\r\n\r\n' +
+      studentName + ', please look out for emails from Trisha regarding your appointment paperwork. ' +
+      'Please do not start working until you have confirmation that your appointment is active and you are on payroll.\r\n\r\n' +
+      'Thank you,\r\nBecca';
+    return 'mailto:' + encodeURIComponent(to) +
+      '?cc=' + encodeURIComponent(cc) +
+      '&subject=' + encodeURIComponent(subject) +
+      '&body=' + encodeURIComponent(body);
+  }
+
+  function buildCongratsMailto(studentName, studentEmail, facultyName) {
+    var piEmail = FACULTY_EMAILS[facultyName] || '';
+    var cc = [ADMIN_EMAIL, piEmail].filter(Boolean).join(',');
+    var subject = 'Congratulations — AE Research Scholars Appointment Official';
+    var body = 'Hi ' + studentName.split(' ')[0] + ',\r\n\r\n' +
+      'Congratulations! Your AE Research Scholars appointment with Dr. ' + facultyName.split(' ').pop() +
+      ' is now official. I will be adding you to the Teams channel shortly.\r\n\r\n' +
+      'Welcome aboard!\r\nBecca';
+    return 'mailto:' + encodeURIComponent(studentEmail) +
+      '?cc=' + encodeURIComponent(cc) +
+      '&subject=' + encodeURIComponent(subject) +
+      '&body=' + encodeURIComponent(body);
   }
 
   function escapeHtml(str) {
