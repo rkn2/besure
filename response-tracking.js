@@ -289,7 +289,7 @@
           if (result.success) {
             msg.className = 'response-msg response-msg--ok';
             if (status === 'Student accepted') {
-              msg.textContent = 'Saved. Finance draft created in Doc Nap\'s Gmail.';
+              msg.textContent = 'Saved. Onboarding email will be sent to your Outlook shortly.';
             } else if (status === 'Program accepted') {
               var mailtoUrl = buildCongratsMailto(studentName, studentEmail, faculty);
               msg.innerHTML = 'Saved. <a href="' + mailtoUrl + '" class="btn btn-primary draft-email-btn">Draft welcome email</a>';
