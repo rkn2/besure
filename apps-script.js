@@ -105,7 +105,11 @@ function handleSubmit(e, page) {
 
   if (status === 'Student accepted') {
     var funding = lookupFunding(studentEmail, facultyName);
-    createOnboardingDraft(studentName, studentEmail, facultyName, funding);
+    var pendingSheet = getOrCreateSheet('Pending Onboarding',
+      ['Timestamp', 'Student Name', 'Student Email', 'Faculty Name',
+       'Label 1', 'Fund 1', 'Label 2', 'Fund 2', 'Sent']);
+    pendingSheet.appendRow([new Date(), studentName, studentEmail, facultyName,
+      funding.label1, funding.fund1, funding.label2, funding.fund2, '']);
   }
 
   return ContentService.createTextOutput(JSON.stringify({ success: true }))

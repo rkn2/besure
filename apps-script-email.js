@@ -1,12 +1,10 @@
 // === Standalone Apps Script for psuaeresearchscholars@gmail.com ===
-// Processes forwarded acceptance emails and creates onboarding drafts.
+// Sends onboarding notification emails to Becca when faculty accept students.
 //
 // Setup:
-//   1. In psuaeresearchscholars@gmail.com, create a label "aers-accept"
-//   2. Create a filter: from:rjn5308@psu.edu → apply label "aers-accept"
-//   3. Go to Triggers (clock icon) → Add Trigger:
-//      Function: processAcceptanceEmails, Time-driven, Minutes timer, Every 5 minutes
-//   4. Share the response tracking spreadsheet with psuaeresearchscholars@gmail.com (Editor)
+//   1. Share the response tracking spreadsheet with psuaeresearchscholars@gmail.com (Editor)
+//   2. Go to Triggers (clock icon) → Add Trigger:
+//      Function: processPendingOnboarding, Time-driven, Minutes timer, Every 5 minutes
 
 var SPREADSHEET_ID = '1BgrIr-u9Jwty0_1oRt-KzMbswWcci9gwJVy9Ae7X2Wc';
 var RESPONSE_SHEET = 'Faculty Responses';
@@ -160,4 +158,57 @@ function createOnboardingDraft(studentName, studentEmail, piName, funding) {
   var cc = [piEmail, studentEmail].filter(function(e) { return e; }).join(',');
 
   GmailApp.createDraft(FINANCE_EMAIL, subject, body, { cc: cc });
+}
+
+// ── Process pending onboarding from website ────────────────────────
+
+function processPendingOnboarding() {
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sheet = ss.getSheetByName('Pending Onboarding');
+  if (!sheet) return;
+
+  var data = sheet.getDataRange().getValues();
+  if (data.length < 2) return;
+
+  for (var i = 1; i < data.length; i++) {
+    var sent = (data[i][8] || '').toString().trim();
+    if (sent) continue;
+
+    var studentName = (data[i][1] || '').toString().trim();
+    var studentEmail = (data[i][2] || '').toString().trim();
+    var facultyName = (data[i][3] || '').toString().trim();
+    var label1 = (data[i][4] || '').toString().trim();
+    var fund1 = (data[i][5] || '').toString().trim();
+    var label2 = (data[i][6] || '').toString().trim();
+    var fund2 = (data[i][7] || '').toString().trim();
+
+    if (!studentName || !facultyName) continue;
+
+    var piEmail = FACULTY_EMAILS[facultyName] || '';
+    var fundLine1 = fund1
+      ? ('    •    Funding Source 1: ' + label1 + ' on IO ' + fund1)
+      : ('    •    Funding Source 1: TBD');
+    var fundLine2 = fund2
+      ? ('    •    Funding Source 2: ' + label2 + ' on IO ' + fund2)
+      : ('    •    Funding Source 2: TBD');
+
+    var forwardBody = 'Hi Latrisha, this email is to confirm the payroll details for our new student researcher:\n\n' +
+      '    •    Student: ' + studentName + '\n' +
+      '    •    Faculty Mentor/Supervisor: ' + facultyName + ' (They will be responsible for approving their hours).\n' +
+      fundLine1 + '\n' +
+      fundLine2 + '\n\n' +
+      'Please let me know if you need any additional information to get them set up in the system!\n\n' +
+      'Thanks,\nBecca';
+
+    var notifySubject = 'Ready to send: Onboarding for ' + studentName + ' with ' + facultyName;
+    var notifyBody = 'A faculty member marked ' + studentName + ' as accepted with ' + facultyName + '.\n\n' +
+      'Review the email below and forward it to Latrisha (' + FINANCE_EMAIL + ').\n' +
+      'CC: ' + [piEmail, studentEmail].filter(Boolean).join(', ') + '\n\n' +
+      '--- FORWARD THIS ---\n\n' +
+      'Subject: New AE Research Scholar Payroll Information\n\n' +
+      forwardBody;
+
+    GmailApp.sendEmail(ADMIN_EMAIL, notifySubject, notifyBody);
+    sheet.getRange(i + 1, 9).setValue(new Date().toISOString());
+  }
 }
