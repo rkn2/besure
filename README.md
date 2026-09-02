@@ -185,6 +185,24 @@ Faculty emails are maintained in `FACULTY_EMAILS` in both `apps-script.js` and `
 | Finance / payroll | Latrisha Hough | ldw5@psu.edu |
 | Program email account | — | psuaeresearchscholars@gmail.com |
 
+## Common tasks
+
+### Removing a student
+If a student applied by mistake or needs to be removed:
+1. Open the Google Sheet linked to the form
+2. Find their row, right-click the row number, delete row
+3. The website pulls data live from the sheet — they disappear immediately
+
+### Adding or removing faculty
+Update `FACULTY_EMAILS` in **both** scripts:
+- `apps-script.js` (spreadsheet script — redeploy after saving)
+- `apps-script-email.js` (standalone psuaeresearchscholars script — save only, no deploy needed)
+
+Also update the `FACULTY_OPTIONS` map in `view/index.html` and the faculty roster table in this README.
+
+### Resume access issues
+If faculty report needing to "request access" for resumes, the Google Drive subfolder permissions have reset. Fix: Google Drive > search "Please attach a pdf of your resume" > Share > "Anyone with the link" > Viewer. See the Resumes section above.
+
 ## Admin tools
 
 Admin tools (matching script, Flask dashboard, email templates) live in the private repo: [besure-admin](https://github.com/rkn2/besure-admin)
