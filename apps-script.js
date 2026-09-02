@@ -246,6 +246,14 @@ function handleStudents() {
     else if (h.indexOf('resume') !== -1) cols.resume = j;
   }
 
+  function normalizeMajor(val) {
+    if (!val) return '';
+    var lower = val.toLowerCase().replace(/[^a-z ]/g, ' ').replace(/\s+/g, ' ').trim();
+    if (/material.?\s*science/.test(lower)) return 'Materials Science & Engineering';
+    if (/^b\.?\s*arch/.test(lower) || /^architecture/.test(lower)) return 'Architecture';
+    return val.trim();
+  }
+
   function parseInterest(val) {
     if (!val) return null;
     var s = val.toString().toLowerCase();
@@ -263,7 +271,7 @@ function handleStudents() {
       name: cols.name !== -1 ? (data[i][cols.name] || '').toString().trim() : '',
       email: email,
       gradYear: cols.gradYear !== -1 ? (parseInt(data[i][cols.gradYear]) || null) : null,
-      major: cols.major !== -1 ? (data[i][cols.major] || '').toString().trim() : '',
+      major: cols.major !== -1 ? normalizeMajor((data[i][cols.major] || '').toString()) : '',
       usResident: cols.usResident !== -1 ? (data[i][cols.usResident] || '').toString().trim() || null : null,
       interests: {
         'Structures': parseInterest(cols.structures !== -1 ? data[i][cols.structures] : null),
