@@ -161,12 +161,11 @@
             '<option value="Summer">Summer (1st Half + 2nd Half)</option>' +
           '</select>' +
         '</div>' +
-        '<div class="response-form-row" style="margin-bottom:0.4rem;">' +
-          '<select class="response-select" name="deptMatchPeriod">' +
-            '<option value="1">Fall — Department match</option>' +
-            '<option value="2">Spring — Department match</option>' +
-            '<option value="none">No department match</option>' +
-          '</select>' +
+        '<div class="dept-match-radios" style="margin-bottom:0.4rem;font-size:0.85rem;">' +
+          '<label style="display:block;font-weight:500;margin-bottom:0.3rem;">Department match semester:</label>' +
+          '<label class="radio-label"><input type="radio" name="deptMatchPeriod" value="1" checked> <span class="dept-match-label-1">Fall</span></label> ' +
+          '<label class="radio-label"><input type="radio" name="deptMatchPeriod" value="2"> <span class="dept-match-label-2">Spring</span></label> ' +
+          '<label class="radio-label"><input type="radio" name="deptMatchPeriod" value="none"> None</label>' +
         '</div>' +
         '<div class="response-form-row" id="pi-fund-row">' +
           '<input type="text" class="response-select" name="piFund" placeholder="PI fund / IO number for the other semester">' +
@@ -181,7 +180,7 @@
     var statusSelect = form.querySelector('[name="status"]');
     var fundingFields = form.querySelector('.funding-fields');
     var periodSelect = form.querySelector('[name="periodType"]');
-    var deptMatchSelect = form.querySelector('[name="deptMatchPeriod"]');
+    var deptMatchRadios = form.querySelectorAll('[name="deptMatchPeriod"]');
     var piFundInput = form.querySelector('[name="piFund"]');
     var piFundRow = form.querySelector('#pi-fund-row');
     var bothFundsRow = form.querySelector('#both-funds-row');
@@ -198,14 +197,20 @@
     });
 
     periodSelect.addEventListener('change', updateFundLabels);
-    deptMatchSelect.addEventListener('change', updateFundLabels);
+    deptMatchRadios.forEach(function (r) { r.addEventListener('change', updateFundLabels); });
+
+    function getDeptMatch() {
+      var checked = form.querySelector('[name="deptMatchPeriod"]:checked');
+      return checked ? checked.value : '1';
+    }
 
     function updateFundLabels() {
       var labels = getPeriodLabels(periodSelect.value);
-      deptMatchSelect.options[0].textContent = labels[0] + ' — Department match';
-      deptMatchSelect.options[1].textContent = labels[1] + ' — Department match';
+      form.querySelector('.dept-match-label-1').textContent = labels[0];
+      form.querySelector('.dept-match-label-2').textContent = labels[1];
 
-      if (deptMatchSelect.value === 'none') {
+      var match = getDeptMatch();
+      if (match === 'none') {
         piFundRow.style.display = 'none';
         bothFundsRow.style.display = '';
         fund1Input.placeholder = labels[0] + ' — IO number';
@@ -213,16 +218,17 @@
       } else {
         piFundRow.style.display = '';
         bothFundsRow.style.display = 'none';
-        var otherLabel = deptMatchSelect.value === '1' ? labels[1] : labels[0];
+        var otherLabel = match === '1' ? labels[1] : labels[0];
         piFundInput.placeholder = otherLabel + ' — PI fund / IO number';
       }
     }
 
     function getFundValues() {
       var labels = getPeriodLabels(periodSelect.value);
-      if (deptMatchSelect.value === 'none') {
+      var match = getDeptMatch();
+      if (match === 'none') {
         return { label1: labels[0], fund1: fund1Input.value, label2: labels[1], fund2: fund2Input.value };
-      } else if (deptMatchSelect.value === '1') {
+      } else if (match === '1') {
         return { label1: labels[0], fund1: 'Dept match', label2: labels[1], fund2: piFundInput.value };
       } else {
         return { label1: labels[0], fund1: piFundInput.value, label2: labels[1], fund2: 'Dept match' };
