@@ -168,12 +168,13 @@
           '<label class="radio-label"><input type="radio" name="deptMatchPeriod" value="none"> None</label>' +
         '</div>' +
         '<div class="response-form-row" id="pi-fund-row">' +
-          '<input type="text" class="response-select" name="piFund" placeholder="PI fund / IO number for the other semester">' +
+          '<input type="text" class="response-select" name="piFund" placeholder="IO number">' +
         '</div>' +
         '<div class="response-form-row" id="both-funds-row" style="display:none;">' +
-          '<input type="text" class="response-select" name="fund1" placeholder="Fund 1">' +
-          '<input type="text" class="response-select" name="fund2" placeholder="Fund 2">' +
+          '<input type="text" class="response-select" name="fund1" placeholder="IO number">' +
+          '<input type="text" class="response-select" name="fund2" placeholder="IO number">' +
         '</div>' +
+        '<p style="font-size:0.75rem;color:var(--text-secondary);margin-top:0.3rem;">Don\'t know your IO number? Check SIMBA or contact Latrisha Hough (ldw5@psu.edu).</p>' +
       '</div>' +
       '<div class="response-msg"></div>';
 
