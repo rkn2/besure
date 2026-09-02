@@ -109,6 +109,22 @@
   cursor: pointer;
   user-select: none;
 }
+#faculty-other {
+  flex: 1;
+  max-width: 320px;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.95rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--card-bg);
+  color: var(--text);
+  font-family: inherit;
+}
+#faculty-other:focus {
+  outline: none;
+  border-color: var(--navy);
+  box-shadow: 0 0 0 2px rgba(30,58,95,0.15);
+}
 </style>
 </head>
 <body>
@@ -132,6 +148,7 @@
       <select id="faculty-select">
         <option value="">Select your name…</option>
       </select>
+      <input type="text" id="faculty-other" placeholder="Type your name…" style="display:none;">
     </div>
 
     <div class="filter-bar" id="filter-bar"></div>
@@ -186,6 +203,7 @@
   };
 
   var facultySelect = document.getElementById('faculty-select');
+  var facultyOther = document.getElementById('faculty-other');
   var filterBar = document.getElementById('filter-bar');
   var studentList = document.getElementById('student-list');
   var studentCount = document.getElementById('student-count');
@@ -201,6 +219,33 @@
     opt.textContent = name;
     facultySelect.appendChild(opt);
   });
+  var otherOpt = document.createElement('option');
+  otherOpt.value = '__other__';
+  otherOpt.textContent = 'Other';
+  facultySelect.appendChild(otherOpt);
+
+  function getSelectedFaculty() {
+    if (facultySelect.value === '__other__') return facultyOther.value.trim();
+    return facultySelect.value;
+  }
+
+  function syncFacultyToForms() {
+    var name = getSelectedFaculty();
+    if (!name) return;
+    document.querySelectorAll('.response-form [name="faculty"]').forEach(function (sel) {
+      var matched = false;
+      for (var i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].value === name) { sel.value = name; matched = true; break; }
+      }
+      if (!matched && name) {
+        var opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        sel.appendChild(opt);
+        sel.value = name;
+      }
+    });
+  }
 
   // Build filter chips
   var allChip = makeChip('All Students', 'all');
@@ -217,8 +262,17 @@
   majorSelect.addEventListener('change', function () { applyFilters(); });
 
   facultySelect.addEventListener('change', function () {
+    facultyOther.style.display = facultySelect.value === '__other__' ? '' : 'none';
     try { localStorage.setItem('ae-scholars-faculty', facultySelect.value); } catch (e) {}
-    onFacultyChange();
+    if (facultySelect.value !== '__other__') {
+      onFacultyChange();
+      syncFacultyToForms();
+    }
+  });
+
+  facultyOther.addEventListener('input', function () {
+    try { localStorage.setItem('ae-scholars-faculty-other', facultyOther.value); } catch (e) {}
+    syncFacultyToForms();
   });
 
   // Show loading state
@@ -294,15 +348,22 @@
         studentList.appendChild(card);
       });
 
-      // Load response-tracking now that cards exist
+      // Load response-tracking now that cards exist, then sync faculty
       var rtScript = document.createElement('script');
       rtScript.src = '../response-tracking.js';
+      rtScript.onload = function () { syncFacultyToForms(); };
       document.body.appendChild(rtScript);
 
       // Restore faculty selection and apply filters
       try {
         var saved = localStorage.getItem('ae-scholars-faculty');
-        if (saved && FACULTY_OPTIONS[saved]) {
+        if (saved === '__other__') {
+          facultySelect.value = '__other__';
+          facultyOther.style.display = '';
+          var savedOther = localStorage.getItem('ae-scholars-faculty-other') || '';
+          facultyOther.value = savedOther;
+          applyFilters();
+        } else if (saved && FACULTY_OPTIONS[saved]) {
           facultySelect.value = saved;
           onFacultyChange();
         } else {
