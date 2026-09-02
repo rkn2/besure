@@ -297,7 +297,9 @@
             } else {
               msg.textContent = 'Saved.';
             }
+            var savedFaculty = form.querySelector('[name="faculty"]').value;
             form.reset();
+            form.querySelector('[name="faculty"]').value = savedFaculty;
             fundingFields.style.display = 'none';
             loadResponses();
           } else {
