@@ -236,16 +236,24 @@ function processPendingOnboarding() {
       'Please let me know if you need any additional information to get them set up in the system!\n\n' +
       'Thanks,\nBecca';
 
-    var notifySubject = 'Ready to send: Onboarding for ' + studentName + ' with ' + facultyName;
-    var notifyBody = 'A faculty member marked ' + studentName + ' as accepted with ' + facultyName + '.\n\n' +
-      'Review the email below and forward it to Latrisha (' + FINANCE_EMAIL + ').\n' +
-      'CC: ' + [piEmail, studentEmail].filter(Boolean).join(', ') + '\n\n' +
-      '--- FORWARD THIS ---\n\n' +
-      'Subject: New AE Research Scholar Payroll Information\n\n' +
-      forwardBody;
+    // Payroll email to Latrisha (CC: Becca, PI — no student)
+    var payrollCc = [ADMIN_EMAIL, piEmail].filter(Boolean).join(',');
+    GmailApp.sendEmail(FINANCE_EMAIL, 'New AE Research Scholar Payroll Information', forwardBody, { cc: payrollCc });
 
-    var cc = [ADMIN_EMAIL, piEmail, studentEmail].filter(Boolean).join(',');
-    GmailApp.sendEmail(FINANCE_EMAIL, 'New AE Research Scholar Payroll Information', forwardBody, { cc: cc });
+    // Welcome email to student (CC: Becca, PI)
+    var welcomeSubject = 'Welcome to the AE Research Scholars Program!';
+    var welcomeBody = 'Dear ' + studentName.split(' ')[0] + ',\n\n' +
+      'Welcome to the AE Research Scholars program! We are thrilled to have you join us!!\n\n' +
+      'To help you get started and stay connected, we have added you to the official AE Research Scholars channel on Microsoft Teams. This channel is our primary hub for communication, where we post important information about graduate school fellowships, research scholarships, professional development events, and other opportunities relevant to your academic and research career!\n\n' +
+      'A key component of the AE Research Scholars program is sharing your work with the broader community. To that end, all student researchers participate in a poster session at the end of each year (April) to present their progress and accomplishments. We will share more details about the poster session as the end of the semester approaches. Since you are starting in the middle of the year, it is your choice if you want to participate in the poster session this year or next year—please talk this through with your faculty mentor.\n\n' +
+      'The position pays $15/hour, and the average time commitment is about 5 hours per week, though some students work up to 10 hours. This is something you and your faculty mentor can decide together based on your project and schedule. Please note that you must wait until you are officially in the university system before starting any work. Latrisha Hough will send you instructions on how to apply for the paid research position through the university system—please keep an eye out for her email.\n\n' +
+      'In terms of research mentoring and meetings, your faculty mentor is your primary contact. Some students meet weekly, others monthly, and some prefer quick check-ins via Teams. Have a conversation with your mentor about what works best for both of you and your project. If you run into any issues with this, please reach back out to me—I\'m happy to help.\n\n' +
+      'We are looking forward to seeing the great work you will do with ' + facultyName + '! Please don\'t hesitate to reach out if you have any questions.\n\n' +
+      'Best regards,\nDoc Nap';
+
+    var welcomeCc = [ADMIN_EMAIL, piEmail].filter(Boolean).join(',');
+    GmailApp.sendEmail(studentEmail, welcomeSubject, welcomeBody, { cc: welcomeCc });
+
     sheet.getRange(i + 1, 9).setValue(new Date().toISOString());
   }
 }
