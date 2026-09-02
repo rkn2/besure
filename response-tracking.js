@@ -29,7 +29,8 @@
   var STATUSES = [
     { value: 'Interested', label: 'Interested' },
     { value: 'Emailed', label: 'Send introduction email to student' },
-    { value: 'Accepted', label: 'Accept — send payroll to finance' }
+    { value: 'Accepted', label: 'Accept — send payroll to finance' },
+    { value: 'Not interested', label: 'Not interested' }
   ];
 
   var pageSlug = location.pathname.split('/').filter(Boolean).pop() || '';
@@ -108,7 +109,14 @@
 
     var list = document.createElement('div');
     list.className = 'response-list';
-    responses.forEach(function (r) {
+    var visibleResponses = responses.filter(function (r) {
+      return (r['Status'] || '').toLowerCase() !== 'not interested';
+    });
+    if (!visibleResponses.length) {
+      container.innerHTML = '<p class="response-none">No faculty responses yet.</p>';
+      return;
+    }
+    visibleResponses.forEach(function (r) {
       var item = document.createElement('div');
       item.className = 'response-item';
       var statusClass = 'response-status--default';
