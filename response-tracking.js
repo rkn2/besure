@@ -219,8 +219,7 @@
       } else {
         piFundRow.style.display = '';
         bothFundsRow.style.display = 'none';
-        var otherLabel = match === '1' ? labels[1] : labels[0];
-        piFundInput.placeholder = otherLabel + ' — PI fund / IO number';
+        piFundInput.placeholder = 'IO number';
       }
     }
 
