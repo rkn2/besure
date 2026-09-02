@@ -294,6 +294,11 @@
         studentList.appendChild(card);
       });
 
+      // Load response-tracking now that cards exist
+      var rtScript = document.createElement('script');
+      rtScript.src = '../response-tracking.js';
+      document.body.appendChild(rtScript);
+
       // Restore faculty selection and apply filters
       try {
         var saved = localStorage.getItem('ae-scholars-faculty');
@@ -420,6 +425,5 @@
   }
 })();
 </script>
-<script src="../response-tracking.js"></script>
 </body>
 </html>
