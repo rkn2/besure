@@ -103,6 +103,11 @@ function handleSubmit(e, page) {
     sheet.appendRow([new Date(), page, studentEmail, studentName, facultyName, status]);
   }
 
+  if (status === 'Student accepted') {
+    var funding = lookupFunding(studentEmail, facultyName);
+    createOnboardingDraft(studentName, studentEmail, facultyName, funding);
+  }
+
   return ContentService.createTextOutput(JSON.stringify({ success: true }))
     .setMimeType(ContentService.MimeType.JSON);
 }

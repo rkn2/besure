@@ -154,16 +154,26 @@
       '</div>' +
       '<div class="funding-fields" style="display:none;">' +
         '<label class="response-form-label" style="margin-top:0.6rem;">Funding information:</label>' +
-        '<p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:0.4rem;">One semester is funded by BESURE (department), the other by PI funds. Enter the fund source or IO number for each period.</p>' +
+        '<p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:0.4rem;">The department match is only available for students majoring (or intending to major) in Architectural Engineering.</p>' +
         '<div class="response-form-row" style="margin-bottom:0.4rem;">' +
           '<select class="response-select" name="periodType">' +
             '<option value="Academic Year">Academic Year (Fall + Spring)</option>' +
             '<option value="Summer">Summer (1st Half + 2nd Half)</option>' +
           '</select>' +
         '</div>' +
-        '<div class="response-form-row">' +
-          '<input type="text" class="response-select" name="fund1" placeholder="Fall — e.g., BESURE">' +
-          '<input type="text" class="response-select" name="fund2" placeholder="Spring — e.g., IO number">' +
+        '<div class="response-form-row" style="margin-bottom:0.4rem;">' +
+          '<select class="response-select" name="deptMatchPeriod">' +
+            '<option value="1">Fall — Department match</option>' +
+            '<option value="2">Spring — Department match</option>' +
+            '<option value="none">No department match</option>' +
+          '</select>' +
+        '</div>' +
+        '<div class="response-form-row" id="pi-fund-row">' +
+          '<input type="text" class="response-select" name="piFund" placeholder="PI fund / IO number for the other semester">' +
+        '</div>' +
+        '<div class="response-form-row" id="both-funds-row" style="display:none;">' +
+          '<input type="text" class="response-select" name="fund1" placeholder="Fund 1">' +
+          '<input type="text" class="response-select" name="fund2" placeholder="Fund 2">' +
         '</div>' +
       '</div>' +
       '<div class="response-msg"></div>';
@@ -171,6 +181,10 @@
     var statusSelect = form.querySelector('[name="status"]');
     var fundingFields = form.querySelector('.funding-fields');
     var periodSelect = form.querySelector('[name="periodType"]');
+    var deptMatchSelect = form.querySelector('[name="deptMatchPeriod"]');
+    var piFundInput = form.querySelector('[name="piFund"]');
+    var piFundRow = form.querySelector('#pi-fund-row');
+    var bothFundsRow = form.querySelector('#both-funds-row');
     var fund1Input = form.querySelector('[name="fund1"]');
     var fund2Input = form.querySelector('[name="fund2"]');
 
@@ -184,11 +198,35 @@
     });
 
     periodSelect.addEventListener('change', updateFundLabels);
+    deptMatchSelect.addEventListener('change', updateFundLabels);
 
     function updateFundLabels() {
       var labels = getPeriodLabels(periodSelect.value);
-      fund1Input.placeholder = labels[0] + ' — e.g., BESURE';
-      fund2Input.placeholder = labels[1] + ' — e.g., IO number';
+      deptMatchSelect.options[0].textContent = labels[0] + ' — Department match';
+      deptMatchSelect.options[1].textContent = labels[1] + ' — Department match';
+
+      if (deptMatchSelect.value === 'none') {
+        piFundRow.style.display = 'none';
+        bothFundsRow.style.display = '';
+        fund1Input.placeholder = labels[0] + ' — IO number';
+        fund2Input.placeholder = labels[1] + ' — IO number';
+      } else {
+        piFundRow.style.display = '';
+        bothFundsRow.style.display = 'none';
+        var otherLabel = deptMatchSelect.value === '1' ? labels[1] : labels[0];
+        piFundInput.placeholder = otherLabel + ' — PI fund / IO number';
+      }
+    }
+
+    function getFundValues() {
+      var labels = getPeriodLabels(periodSelect.value);
+      if (deptMatchSelect.value === 'none') {
+        return { label1: labels[0], fund1: fund1Input.value, label2: labels[1], fund2: fund2Input.value };
+      } else if (deptMatchSelect.value === '1') {
+        return { label1: labels[0], fund1: 'Dept match', label2: labels[1], fund2: piFundInput.value };
+      } else {
+        return { label1: labels[0], fund1: piFundInput.value, label2: labels[1], fund2: 'Dept match' };
+      }
     }
 
     form.addEventListener('submit', function (e) {
@@ -211,42 +249,44 @@
         status: status
       });
 
-      var statusPromise = fetch(SCRIPT_URL + '?' + params.toString())
-        .then(function (r) { return r.json(); });
+      var submitStatus = function () {
+        return fetch(SCRIPT_URL + '?' + params.toString())
+          .then(function (r) { return r.json(); });
+      };
 
-      var placementPromise;
+      var chain;
       if (status === 'Student accepted') {
-        var labels = getPeriodLabels(periodSelect.value);
+        var funds = getFundValues();
         var placementParams = new URLSearchParams({
           action: 'submitPlacement',
           studentEmail: studentEmail,
           studentName: studentName,
           facultyName: faculty,
           periodType: periodSelect.value,
-          label1: labels[0],
-          label2: labels[1],
-          fund1: fund1Input.value,
-          fund2: fund2Input.value
+          label1: funds.label1,
+          label2: funds.label2,
+          fund1: funds.fund1,
+          fund2: funds.fund2
         });
-        placementPromise = fetch(SCRIPT_URL + '?' + placementParams.toString())
-          .then(function (r) { return r.json(); });
+        chain = fetch(SCRIPT_URL + '?' + placementParams.toString())
+          .then(function (r) { return r.json(); })
+          .then(function (placementResult) {
+            if (!placementResult.success) throw new Error(placementResult.error || 'Placement failed');
+            return submitStatus();
+          });
       } else {
-        placementPromise = Promise.resolve({ success: true });
+        chain = submitStatus();
       }
 
-      Promise.all([statusPromise, placementPromise])
-        .then(function (results) {
-          if (results[0].success && results[1].success) {
+      chain
+        .then(function (result) {
+          if (result.success) {
             msg.className = 'response-msg response-msg--ok';
-            var mailtoUrl = '';
             if (status === 'Student accepted') {
-              var labels = getPeriodLabels(periodSelect.value);
-              mailtoUrl = buildOnboardingMailto(studentName, studentEmail, faculty, labels[0], fund1Input.value, labels[1], fund2Input.value);
+              msg.textContent = 'Saved. Finance draft created in Doc Nap\'s Gmail.';
             } else if (status === 'Program accepted') {
-              mailtoUrl = buildCongratsMailto(studentName, studentEmail, faculty);
-            }
-            if (mailtoUrl) {
-              msg.innerHTML = 'Saved. <a href="' + mailtoUrl + '" class="btn btn-primary draft-email-btn">Draft email</a>';
+              var mailtoUrl = buildCongratsMailto(studentName, studentEmail, faculty);
+              msg.innerHTML = 'Saved. <a href="' + mailtoUrl + '" class="btn btn-primary draft-email-btn">Draft welcome email</a>';
             } else {
               msg.textContent = 'Saved.';
             }
@@ -255,7 +295,7 @@
             loadResponses();
           } else {
             msg.className = 'response-msg response-msg--err';
-            msg.textContent = results[0].error || results[1].error || 'Something went wrong.';
+            msg.textContent = result.error || 'Something went wrong.';
           }
         })
         .catch(function () {
@@ -281,26 +321,6 @@
       note.innerHTML = '<p class="response-unavailable">Faculty response tracking is not yet configured.</p>';
       card.appendChild(note);
     });
-  }
-
-  function buildOnboardingMailto(studentName, studentEmail, facultyName, label1, fund1, label2, fund2) {
-    var piEmail = FACULTY_EMAILS[facultyName] || '';
-    var to = [ADMIN_EMAIL, FINANCE_EMAIL].join(',');
-    var cc = [piEmail, studentEmail].filter(Boolean).join(',');
-    var subject = 'New AE Research Scholar Payroll Information';
-    var fundLine1 = fund1 ? ('    •    Funding Source 1: ' + label1 + ' on IO ' + fund1) : ('    •    Funding Source 1: ' + label1 + ' — TBD');
-    var fundLine2 = fund2 ? ('    •    Funding Source 2: ' + label2 + ' on IO ' + fund2) : ('    •    Funding Source 2: ' + label2 + ' — TBD');
-    var body = 'Hi Latrisha, this email is to confirm the payroll details for our new student researcher:\r\n\r\n' +
-      '    •    Student: ' + studentName + '\r\n' +
-      '    •    Faculty Mentor/Supervisor: ' + facultyName + ' (They will be responsible for approving their hours).\r\n' +
-      fundLine1 + '\r\n' +
-      fundLine2 + '\r\n\r\n' +
-      'Please let me know if you need any additional information to get them set up in the system!\r\n\r\n' +
-      'Thanks,\r\nBecca';
-    return 'mailto:' + encodeURIComponent(to) +
-      '?cc=' + encodeURIComponent(cc) +
-      '&subject=' + encodeURIComponent(subject) +
-      '&body=' + encodeURIComponent(body);
   }
 
   function buildCongratsMailto(studentName, studentEmail, facultyName) {
