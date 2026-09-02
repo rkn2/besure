@@ -252,7 +252,7 @@ function handleStudents() {
     else if (h.indexOf('graduation') !== -1) cols.gradYear = j;
     else if (h.indexOf('major') !== -1) cols.major = j;
     else if (h.indexOf('citizen') !== -1 || h.indexOf('permanent resident') !== -1) cols.usResident = j;
-    else if (h.indexOf('structures') !== -1) cols.structures = j;
+    else if (h.indexOf('structural') !== -1 || h.indexOf('structures') !== -1) cols.structures = j;
     else if (h.indexOf('mechanical') !== -1 || h.indexOf('energy') !== -1) cols.mechEnergy = j;
     else if (h.indexOf('lighting') !== -1 || h.indexOf('electrical') !== -1) cols.lighting = j;
     else if (h.indexOf('construction') !== -1) cols.construction = j;
