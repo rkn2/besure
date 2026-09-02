@@ -209,6 +209,7 @@ Admin tools (matching script, Flask dashboard, email templates) live in the priv
 
 ## TODO
 
+- [ ] **Move `FACULTY_EMAILS` to a Google Sheet** — currently hardcoded in both `apps-script.js` and `apps-script-email.js`. Adding/removing faculty requires updating both. Pull from a "Faculty" sheet instead so there's one source of truth.
 - [ ] Consider custom subdomain (e.g., `scholars.ae.psu.edu`) — requires CNAME from dept IT pointing to `rkn2.github.io`, then configure in GitHub Pages settings
 - [ ] Consider private hosting for cohort pages (currently public repo with unguessable URLs — fine for now)
 - [ ] Update `generate_cohorts.py` template in `besure-admin` when adding new features to cohort page
