@@ -17,6 +17,81 @@ Matches undergraduate students with AE faculty for paid research positions ($15/
 5. Push the generated `view/` pages, copy the draft emails, send
 6. Track placements and funding with the local Flask admin app
 
+## Status workflow
+
+Three statuses, each with an automated action:
+
+| Status | Dropdown label | What happens |
+|--------|---------------|--------------|
+| **Interested** | Interested | Logged to sheet. Nothing else. |
+| **Emailed** | Send introduction email to student | Sends an email from `psuaeresearchscholars@gmail.com` to the student introducing them to the faculty member. CC: Becca + PI. Confirmation popup before sending. |
+| **Accepted** | Accept — send payroll to finance | Two emails fire: (1) payroll setup to Latrisha Hough (ldw5@psu.edu), CC Becca + PI; (2) welcome email to the student, CC Becca + PI. Student does not see the finance info. Confirmation popup before sending. |
+
+Both "Emailed" and "Accepted" show a confirmation popup so nothing fires by accident.
+
+## Email flow (how the two scripts work together)
+
+There are two Google Apps Scripts that work together:
+
+### 1. Spreadsheet script (`apps-script.js`)
+- Lives in the response tracking spreadsheet (Extensions > Apps Script)
+- Deployed as a web app (must redeploy as **new version** after any code change)
+- Handles form submissions from the faculty-facing website
+- On **Emailed**: writes a row to the "Pending Introductions" sheet
+- On **Accepted**: writes a row to the "Pending Onboarding" sheet
+- Does NOT send emails (can't send from psuaeresearchscholars)
+
+### 2. Standalone script (`apps-script-email.js`)
+- Lives under the `psuaeresearchscholars@gmail.com` Google account (script.google.com)
+- Runs on a 5-minute timer trigger (NOT a web app -- saving is enough, no deploy needed)
+- Two functions run on triggers:
+  - **`processPendingIntroductions`**: picks up rows from "Pending Introductions", sends introduction email to the student from psuaeresearchscholars, marks row as sent
+  - **`processPendingOnboarding`**: picks up rows from "Pending Onboarding", sends payroll email to Latrisha AND welcome email to student from psuaeresearchscholars, marks row as sent
+- Also handles email-triggered acceptance via Gmail label (`aers-accept`)
+
+### Updating the scripts
+
+**Spreadsheet script** (handles website submissions):
+1. Copy entire contents of `apps-script.js`
+2. Paste into the spreadsheet's Apps Script editor (Extensions > Apps Script)
+3. Save
+4. **Deploy > Manage deployments > pencil icon > New version > Deploy** (required -- saving alone does NOT update the live web app)
+
+**Standalone script** (sends emails):
+1. Copy entire contents of `apps-script-email.js`
+2. Paste into the standalone script at script.google.com (logged in as psuaeresearchscholars)
+3. Save (no deploy needed -- it runs on a timer)
+
+### Triggers (set up in the standalone script)
+
+| Function | Type | Interval |
+|----------|------|----------|
+| `processPendingIntroductions` | Time-driven, Minutes timer | Every 5 minutes |
+| `processPendingOnboarding` | Time-driven, Minutes timer | Every 5 minutes |
+
+## Emails sent
+
+### Introduction email (on "Emailed")
+- **From:** psuaeresearchscholars@gmail.com
+- **To:** student
+- **CC:** Becca (rjn5308@psu.edu), PI
+- **Subject:** AE Research Scholars — Introduction to [faculty name]
+- **Body:** Lets the student know the faculty member is interested, asks them to reach out directly
+
+### Payroll email (on "Accepted")
+- **From:** psuaeresearchscholars@gmail.com
+- **To:** Latrisha Hough (ldw5@psu.edu)
+- **CC:** Becca (rjn5308@psu.edu), PI
+- **Subject:** New AE Research Scholar Payroll Information
+- **Body:** Student name, faculty mentor, funding sources with IO numbers
+
+### Welcome email (on "Accepted", sent at the same time as payroll)
+- **From:** psuaeresearchscholars@gmail.com
+- **To:** student
+- **CC:** Becca (rjn5308@psu.edu), PI
+- **Subject:** Welcome to the AE Research Scholars Program!
+- **Body:** Teams channel info, poster session, pay rate ($15/hr), wait for Latrisha's onboarding email, meet with your mentor. Signed "Doc Nap."
+
 ## Setup
 
 ### Google Form (one-time)
@@ -77,34 +152,36 @@ All faculty get the same link — `https://rkn2.github.io/besure/view/` — sele
 
 ## Faculty roster
 
-| Faculty | Option(s) |
-|---|---|
-| Nathan Brown | Structures |
-| Rebecca Napolitano | Structures |
-| Tyler Hull | Structures |
-| Botong Zheng | Structures |
-| Yuqing Hu | Mechanical/Energy, Construction |
-| Greg Pavlak | Mechanical/Energy |
-| Wangda Zuo | Mechanical/Energy |
-| Jin Wen | Mechanical/Energy |
-| Donghyun Rim | Mechanical/Energy |
-| Julian Wang | Lighting/Electrical |
-| Dorukalp Durmus | Lighting/Electrical |
-| John Messner | Construction |
-| Rob Leicht | Construction |
-| Juan Pablo Gevaudan | Construction |
+| Faculty | Option(s) | Email |
+|---|---|---|
+| Nathan Brown | Structures | ncb5048@psu.edu |
+| Rebecca Napolitano | Structures | rjn5308@psu.edu |
+| Tyler Hull | Structures | thull@psu.edu |
+| Botong Zheng | Structures | bbz5226@psu.edu |
+| Yuqing Hu | Mechanical/Energy, Construction | yfh5204@psu.edu |
+| Greg Pavlak | Mechanical/Energy | gxp93@psu.edu |
+| Wangda Zuo | Mechanical/Energy | wangda.zuo@psu.edu |
+| Jin Wen | Mechanical/Energy | jvw6499@psu.edu |
+| Donghyun Rim | Mechanical/Energy | dxr51@psu.edu |
+| Julian Wang | Lighting/Electrical | jqw5965@psu.edu |
+| Dorukalp Durmus | Lighting/Electrical | alp@psu.edu |
+| John Messner | Construction | jim101@psu.edu |
+| Rob Leicht | Construction | rml167@psu.edu |
+| Juan Pablo Gevaudan | Construction | j.p.gevaudan@psu.edu |
+
+Faculty emails are maintained in `FACULTY_EMAILS` in both `apps-script.js` and `apps-script-email.js`. Update both when adding/removing faculty.
+
+## Key contacts
+
+| Role | Name | Email |
+|------|------|-------|
+| Program coordinator | Becca Napolitano | rjn5308@psu.edu |
+| Finance / payroll | Latrisha Hough | ldw5@psu.edu |
+| Program email account | — | psuaeresearchscholars@gmail.com |
 
 ## Admin tools
 
 Admin tools (matching script, Flask dashboard, email templates) live in the private repo: [besure-admin](https://github.com/rkn2/besure-admin)
-
-Pipeline: emailed → confirmed with faculty → confirmed with student
-
-Funding tracked per semester with separate source label and IO number fields. Payroll emails go to Michele Kephart.
-
-## Faculty response tracking
-
-Each student card includes a form where faculty can indicate their interest (Interested / Emailed student / Offered position / Student accepted / Did not offer position). When a faculty member selects "Student accepted," a funding form appears for them to enter period type (Academic Year or Summer) and fund/IO numbers for each half. Responses are stored via a Google Apps Script web app in the "Faculty Responses" and "Placements" tabs of the linked Google Sheet. The Apps Script source is in `apps-script.js` for reference; the deployed URL is configured in `response-tracking.js`.
 
 ## TODO
 
