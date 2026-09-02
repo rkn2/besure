@@ -27,9 +27,9 @@
   var FACULTY = Object.keys(FACULTY_EMAILS);
 
   var STATUSES = [
-    'Interested',
-    'Emailed',
-    'Accepted'
+    { value: 'Interested', label: 'Interested' },
+    { value: 'Emailed', label: 'Send introduction email to student' },
+    { value: 'Accepted', label: 'Accept — send payroll to finance' }
   ];
 
   var pageSlug = location.pathname.split('/').filter(Boolean).pop() || '';
@@ -143,7 +143,7 @@
         '</select>' +
         '<select class="response-select" name="status" required>' +
           '<option value="">Status</option>' +
-          STATUSES.map(function (s) { return '<option value="' + escapeHtml(s) + '">' + escapeHtml(s) + '</option>'; }).join('') +
+          STATUSES.map(function (s) { return '<option value="' + escapeHtml(s.value) + '">' + escapeHtml(s.label) + '</option>'; }).join('') +
         '</select>' +
         '<button type="submit" class="btn btn-primary response-submit">Submit</button>' +
       '</div>' +
@@ -235,6 +235,13 @@
       var faculty = form.querySelector('[name="faculty"]').value;
       var status = statusSelect.value;
       if (!faculty || !status) return;
+
+      if (status === 'Emailed') {
+        if (!confirm('This will send an introduction email to ' + studentName + ' connecting them with ' + faculty + '. Continue?')) return;
+      }
+      if (status === 'Accepted') {
+        if (!confirm('This will send a payroll setup email to finance for ' + studentName + ' with ' + faculty + '. Continue?')) return;
+      }
 
       var btn = form.querySelector('.response-submit');
       var msg = form.querySelector('.response-msg');
