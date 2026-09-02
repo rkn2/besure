@@ -319,6 +319,7 @@ var FACULTY_EMAILS = {
   'Rebecca Napolitano': 'rjn5308@psu.edu',
   'Tyler Hull': 'thull@psu.edu',
   'Botong Zheng': 'bbz5226@psu.edu',
+  'Mariantonieta Gutierrez Soto': 'mvg5899@psu.edu',
   'Yuqing Hu': 'yfh5204@psu.edu',
   'Greg Pavlak': 'gxp93@psu.edu',
   'Wangda Zuo': 'wangda.zuo@psu.edu',
