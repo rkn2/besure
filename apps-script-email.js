@@ -113,7 +113,7 @@ function processAcceptanceEmails() {
     }
 
     sheet.getRange(foundRow + 1, 1).setValue(new Date());
-    sheet.getRange(foundRow + 1, 6).setValue('Student accepted');
+    sheet.getRange(foundRow + 1, 6).setValue('Accepted');
 
     var funding = lookupFunding(studentEmail, piName);
     createOnboardingDraft(studentName, studentEmail, piName, funding);
@@ -208,7 +208,8 @@ function processPendingOnboarding() {
       'Subject: New AE Research Scholar Payroll Information\n\n' +
       forwardBody;
 
-    GmailApp.sendEmail(ADMIN_EMAIL, notifySubject, notifyBody);
+    var cc = [ADMIN_EMAIL, piEmail, studentEmail].filter(Boolean).join(',');
+    GmailApp.sendEmail(FINANCE_EMAIL, 'New AE Research Scholar Payroll Information', forwardBody, { cc: cc });
     sheet.getRange(i + 1, 9).setValue(new Date().toISOString());
   }
 }

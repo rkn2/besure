@@ -28,11 +28,8 @@
 
   var STATUSES = [
     'Interested',
-    'Emailed student',
-    'Offered position',
-    'Student accepted',
-    'Doing paperwork',
-    'Program accepted'
+    'Emailed',
+    'Accepted'
   ];
 
   var pageSlug = location.pathname.split('/').filter(Boolean).pop() || '';
@@ -116,11 +113,9 @@
       item.className = 'response-item';
       var statusClass = 'response-status--default';
       var s = (r['Status'] || '').toLowerCase();
-      if (s === 'program accepted') statusClass = 'response-status--program';
-      else if (s === 'doing paperwork') statusClass = 'response-status--paperwork';
-      else if (s === 'student accepted') statusClass = 'response-status--confirmed';
-      else if (s === 'offered position') statusClass = 'response-status--offered';
-      else if (s === 'interested' || s === 'emailed student') statusClass = 'response-status--interested';
+      if (s === 'accepted') statusClass = 'response-status--confirmed';
+      else if (s === 'emailed') statusClass = 'response-status--offered';
+      else if (s === 'interested') statusClass = 'response-status--interested';
       item.innerHTML =
         '<span class="response-faculty">' + escapeHtml(r['Faculty Name']) + '</span>' +
         '<span class="response-status ' + statusClass + '">' + escapeHtml(r['Status']) + '</span>';
@@ -189,7 +184,7 @@
     var fund2Input = form.querySelector('[name="fund2"]');
 
     statusSelect.addEventListener('change', function () {
-      if (statusSelect.value === 'Student accepted') {
+      if (statusSelect.value === 'Accepted') {
         fundingFields.style.display = '';
         updateFundLabels();
       } else {
@@ -261,7 +256,7 @@
       };
 
       var chain;
-      if (status === 'Student accepted') {
+      if (status === 'Accepted') {
         var funds = getFundValues();
         var placementParams = new URLSearchParams({
           action: 'submitPlacement',
@@ -288,11 +283,10 @@
         .then(function (result) {
           if (result.success) {
             msg.className = 'response-msg response-msg--ok';
-            if (status === 'Student accepted') {
-              msg.textContent = 'Saved. Onboarding email will be sent to your Outlook shortly.';
-            } else if (status === 'Program accepted') {
-              var mailtoUrl = buildCongratsMailto(studentName, studentEmail, faculty);
-              msg.innerHTML = 'Saved. <a href="' + mailtoUrl + '" class="btn btn-primary draft-email-btn">Draft welcome email</a>';
+            if (status === 'Accepted') {
+              msg.textContent = 'Saved. Payroll email will be sent to Latrisha shortly.';
+            } else if (status === 'Emailed') {
+              msg.textContent = 'Saved. Introduction email sent to the student.';
             } else {
               msg.textContent = 'Saved.';
             }

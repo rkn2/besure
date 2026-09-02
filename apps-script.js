@@ -103,7 +103,11 @@ function handleSubmit(e, page) {
     sheet.appendRow([new Date(), page, studentEmail, studentName, facultyName, status]);
   }
 
-  if (status === 'Student accepted') {
+  if (status === 'Emailed') {
+    sendIntroductionEmail(studentName, studentEmail, facultyName);
+  }
+
+  if (status === 'Accepted') {
     var funding = lookupFunding(studentEmail, facultyName);
     var pendingSheet = getOrCreateSheet('Pending Onboarding',
       ['Timestamp', 'Student Name', 'Student Email', 'Faculty Name',
@@ -325,6 +329,21 @@ var FACULTY_EMAILS = {
   'Juan Pablo Gevaudan': 'j.p.gevaudan@psu.edu'
 };
 
+function sendIntroductionEmail(studentName, studentEmail, facultyName) {
+  var piEmail = FACULTY_EMAILS[facultyName] || '';
+  var subject = 'AE Research Scholars — Introduction to ' + facultyName;
+  var body = 'Hi ' + studentName.split(' ')[0] + ',\n\n' +
+    'I am reaching out from the AE Research Scholars program to let you know that ' +
+    facultyName + ' is interested in working with you as an undergraduate researcher.\n\n' +
+    'Please reach out to them directly to discuss this further, either via email or in person. ' +
+    'They are CC\'d on this email.\n\n' +
+    'Let me know if you have any questions!\n\n' +
+    'Best,\nBecca Napolitano\nAE Research Scholars Program';
+
+  var cc = [ADMIN_EMAIL, piEmail].filter(Boolean).join(',');
+  GmailApp.sendEmail(studentEmail, subject, body, { cc: cc });
+}
+
 function processAcceptanceEmails() {
   var label = GmailApp.getUserLabelByName(ACCEPT_LABEL);
   if (!label) return;
@@ -388,7 +407,7 @@ function processAcceptanceEmails() {
     }
 
     sheet.getRange(foundRow + 1, 1).setValue(new Date());
-    sheet.getRange(foundRow + 1, 6).setValue('Student accepted');
+    sheet.getRange(foundRow + 1, 6).setValue('Accepted');
 
     var funding = lookupFunding(studentEmail, piName);
     createOnboardingDraft(studentName, studentEmail, piName, funding);
