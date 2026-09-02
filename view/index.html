@@ -141,6 +141,13 @@
       <label for="us-resident-filter">US citizen / permanent resident only</label>
     </div>
 
+    <div class="faculty-bar">
+      <label for="major-select">Major:</label>
+      <select id="major-select">
+        <option value="">All majors</option>
+      </select>
+    </div>
+
     <p class="student-count" id="student-count"></p>
 
     <div id="student-list"></div>
@@ -153,74 +160,7 @@
 
 <script>
 (function () {
-  var STUDENTS = [
-    {
-      name: 'Lucas Paret',
-      email: 'lwp5200@psu.edu',
-      gradYear: 2028,
-      major: 'Architectural Engineering',
-      interests: { 'Structures': null, 'Mechanical / Energy': 'Moderate', 'Lighting / Electrical': 'High', 'Construction': null },
-      description: 'Working in the lighting lab with Alp, learning electrical systems/control systems for smart buildings.',
-      facultyPref: 'Dorukalp Durmus',
-      resume: null,
-      usResident: null
-    },
-    {
-      name: 'Joshua Fuquen',
-      email: 'jaf6841@psu.edu',
-      gradYear: 2029,
-      major: 'Computer Science',
-      interests: { 'Structures': 'Moderate', 'Mechanical / Energy': 'Moderate', 'Lighting / Electrical': 'High', 'Construction': null },
-      description: null,
-      facultyPref: null,
-      resume: null,
-      usResident: null
-    },
-    {
-      name: 'Gianna Wray',
-      email: 'ggw5072@psu.edu',
-      gradYear: 2030,
-      major: 'Architectural Engineering',
-      interests: { 'Structures': 'High', 'Mechanical / Energy': null, 'Lighting / Electrical': null, 'Construction': 'High' },
-      description: 'I am extremely interested in forensic engineering and would love to enhance my interest!',
-      facultyPref: 'Juan Pablo Gevaudan',
-      resume: null,
-      usResident: null
-    },
-    {
-      name: 'Jhanvi Venkitesh',
-      email: 'JSV5254@psu.edu',
-      gradYear: 2029,
-      major: 'Architectural Engineering',
-      interests: { 'Structures': 'High', 'Mechanical / Energy': 'Moderate', 'Lighting / Electrical': null, 'Construction': null },
-      description: 'I am interested in building materials, structural analysis, forensic analysis, building deterioration and durability, and building disaster research.',
-      facultyPref: 'Rebecca Napolitano',
-      resume: null,
-      usResident: null
-    },
-    {
-      name: 'Ashlyn Ferderbar',
-      email: 'agf5334@psu.edu',
-      gradYear: 2030,
-      major: 'Architectural Engineering',
-      interests: { 'Structures': 'High', 'Mechanical / Energy': null, 'Lighting / Electrical': null, 'Construction': 'High' },
-      description: 'Building preservation',
-      facultyPref: 'Dr. Rebecca Napolitano or Dr. JP Gevaudan Burgos',
-      resume: 'resumes/ashlyn-ferderbar.pdf',
-      usResident: null
-    },
-    {
-      name: 'Brianna Helmrich',
-      email: 'bph5618@psu.edu',
-      gradYear: 2030,
-      major: 'Architectural Engineering',
-      interests: { 'Structures': 'Moderate', 'Mechanical / Energy': null, 'Lighting / Electrical': null, 'Construction': 'High' },
-      description: 'I have a strong passion for residential construction, but I would be open to gaining any work experience in any branch of AE.',
-      facultyPref: null,
-      resume: null,
-      usResident: null
-    }
-  ];
+  var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxl3x4KWmjHufkroWiXieWjBcACjWxSguj9EjonvpSxPDfVUYhfg88uhnVjRMhXuAJx/exec';
 
   var FACULTY_OPTIONS = {
     'Nathan Brown': ['Structures'],
@@ -241,12 +181,18 @@
 
   var OPTIONS = ['Structures', 'Mechanical / Energy', 'Lighting / Electrical', 'Construction'];
 
+  var FACULTY_ALIASES = {
+    'doc nap': 'Rebecca Napolitano'
+  };
+
   var facultySelect = document.getElementById('faculty-select');
   var filterBar = document.getElementById('filter-bar');
   var studentList = document.getElementById('student-list');
   var studentCount = document.getElementById('student-count');
   var activeFilters = new Set();
   var usResidentFilter = document.getElementById('us-resident-filter');
+  var majorSelect = document.getElementById('major-select');
+  var totalStudents = 0;
 
   // Build faculty dropdown
   Object.keys(FACULTY_OPTIONS).forEach(function (name) {
@@ -263,77 +209,107 @@
     filterBar.appendChild(makeChip(opt, opt));
   });
 
-  // Render all student cards
-  STUDENTS.forEach(function (s) {
-    var card = document.createElement('div');
-    card.className = 'student-card';
-    card.dataset.email = s.email;
-
-    var highOptions = OPTIONS.filter(function (o) { return s.interests[o] === 'High'; });
-    card.dataset.options = highOptions.join(',');
-    if (s.facultyPref) card.dataset.facultyPref = s.facultyPref;
-    if (s.usResident != null) card.dataset.usResident = s.usResident;
-
-    var badgesHtml = '';
-    OPTIONS.forEach(function (o) {
-      var level = s.interests[o];
-      if (!level) return;
-      var cls = level === 'High' ? 'badge-high' : 'badge-moderate';
-      badgesHtml += '<span class="badge ' + cls + '">' + o + ': ' + level + '</span> ';
-    });
-
-    var descHtml = s.description ? '<div class="description">' + escapeHtml(s.description) + '</div>' : '';
-    var prefHtml = s.facultyPref ? '<div class="description" style="color:var(--text-secondary);font-style:italic;">Faculty preference: ' + escapeHtml(s.facultyPref) + '</div>' : '';
-    var resumeHtml = s.resume ? '<div class="resume-link"><a href="' + s.resume + '" target="_blank" class="btn btn-secondary" style="font-size:0.82rem;padding:0.35rem 0.8rem;margin-top:0.4rem;">View Resume (PDF)</a></div>' : '';
-
-    var appliedHtml = s.applied ? ' &middot; Applied ' + escapeHtml(s.applied) : '';
-
-    card.innerHTML =
-      '<h3>' + escapeHtml(s.name) + '<span class="badge-requested" style="display:none;">Requested you</span></h3>' +
-      '<div class="meta">' + escapeHtml(s.email) + ' &middot; Graduating ' + s.gradYear + ' &middot; ' + escapeHtml(s.major) + appliedHtml + '</div>' +
-      '<div class="interests">' + badgesHtml + '</div>' +
-      descHtml + prefHtml + resumeHtml;
-
-    studentList.appendChild(card);
-  });
-
-  // Fetch application dates from form responses sheet
-  fetch('https://script.google.com/macros/s/AKfycbxl3x4KWmjHufkroWiXieWjBcACjWxSguj9EjonvpSxPDfVUYhfg88uhnVjRMhXuAJx/exec?action=timestamps')
-    .then(function (r) { return r.json(); })
-    .then(function (timestamps) {
-      var cards = studentList.querySelectorAll('.student-card');
-      cards.forEach(function (card) {
-        var email = card.dataset.email.toLowerCase();
-        var ts = timestamps[email];
-        if (ts) {
-          var d = new Date(ts);
-          var formatted = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-          var meta = card.querySelector('.meta');
-          if (meta) meta.innerHTML += ' &middot; Applied ' + escapeHtml(formatted);
-        }
-      });
-    })
-    .catch(function () {});
-
   // Set initial state: show all
   setAllActive();
 
-  // Restore faculty selection from localStorage
-  try {
-    var saved = localStorage.getItem('ae-scholars-faculty');
-    if (saved && FACULTY_OPTIONS[saved]) {
-      facultySelect.value = saved;
-      onFacultyChange();
-    }
-  } catch (e) {}
-
   // Events
   usResidentFilter.addEventListener('change', function () { applyFilters(); });
+  majorSelect.addEventListener('change', function () { applyFilters(); });
 
   facultySelect.addEventListener('change', function () {
     try { localStorage.setItem('ae-scholars-faculty', facultySelect.value); } catch (e) {}
     onFacultyChange();
   });
+
+  // Show loading state
+  studentCount.textContent = 'Loading applicants...';
+
+  // Fetch students from Google Sheet
+  fetch(SCRIPT_URL + '?action=students')
+    .then(function (r) { return r.json(); })
+    .then(function (students) {
+      totalStudents = students.length;
+
+      // Build major dropdown from unique values
+      var majors = [];
+      students.forEach(function (s) {
+        if (s.major && majors.indexOf(s.major) === -1) majors.push(s.major);
+      });
+      majors.sort();
+      majors.forEach(function (m) {
+        var opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = m;
+        majorSelect.appendChild(opt);
+      });
+
+      // Render student cards
+      students.forEach(function (s) {
+        var card = document.createElement('div');
+        card.className = 'student-card';
+        card.dataset.email = s.email;
+
+        var interests = s.interests || {};
+        var highOptions = OPTIONS.filter(function (o) { return interests[o] === 'High'; });
+        card.dataset.options = highOptions.join(',');
+        card.dataset.major = s.major || '';
+        if (s.facultyPref) {
+          var resolvedPref = s.facultyPref;
+          Object.keys(FACULTY_ALIASES).forEach(function (alias) {
+            if (resolvedPref.toLowerCase().indexOf(alias) !== -1) {
+              resolvedPref += ', ' + FACULTY_ALIASES[alias];
+            }
+          });
+          card.dataset.facultyPref = resolvedPref;
+        }
+        if (s.usResident) card.dataset.usResident = s.usResident;
+
+        var badgesHtml = '';
+        OPTIONS.forEach(function (o) {
+          var level = interests[o];
+          if (!level) return;
+          var cls = level === 'High' ? 'badge-high' : 'badge-moderate';
+          badgesHtml += '<span class="badge ' + cls + '">' + o + ': ' + level + '</span> ';
+        });
+
+        var descHtml = s.description ? '<div class="description">' + escapeHtml(s.description) + '</div>' : '';
+        var prefHtml = s.facultyPref ? '<div class="description" style="color:var(--text-secondary);font-style:italic;">Faculty preference: ' + escapeHtml(s.facultyPref) + '</div>' : '';
+        var resumeHtml = s.resume ? '<div class="resume-link"><a href="' + escapeHtml(s.resume) + '" target="_blank" class="btn btn-secondary" style="font-size:0.82rem;padding:0.35rem 0.8rem;margin-top:0.4rem;">View Resume (PDF)</a></div>' : '';
+
+        var appliedHtml = '';
+        if (s.applied) {
+          var d = new Date(s.applied);
+          var formatted = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+          appliedHtml = ' &middot; Applied ' + escapeHtml(formatted);
+        }
+
+        var gradHtml = s.gradYear ? ' &middot; Graduating ' + s.gradYear : '';
+
+        card.innerHTML =
+          '<h3>' + escapeHtml(s.name) + '<span class="badge-requested" style="display:none;">Requested you</span></h3>' +
+          '<div class="meta">' + escapeHtml(s.email) + gradHtml + (s.major ? ' &middot; ' + escapeHtml(s.major) : '') + appliedHtml + '</div>' +
+          '<div class="interests">' + badgesHtml + '</div>' +
+          descHtml + prefHtml + resumeHtml;
+
+        studentList.appendChild(card);
+      });
+
+      // Restore faculty selection and apply filters
+      try {
+        var saved = localStorage.getItem('ae-scholars-faculty');
+        if (saved && FACULTY_OPTIONS[saved]) {
+          facultySelect.value = saved;
+          onFacultyChange();
+        } else {
+          applyFilters();
+        }
+      } catch (e) {
+        applyFilters();
+      }
+    })
+    .catch(function () {
+      studentCount.textContent = 'Could not load applicants.';
+    });
 
   function onFacultyChange() {
     var faculty = facultySelect.value;
@@ -392,6 +368,7 @@
     var showAll = activeFilters.has('all');
     var faculty = facultySelect.value;
     var onlyUsResident = usResidentFilter.checked;
+    var selectedMajor = majorSelect.value;
     var visible = 0;
 
     var cards = studentList.querySelectorAll('.student-card');
@@ -403,8 +380,9 @@
 
       var matchesOption = matchesFilter || requestedByFaculty;
       var matchesCitizenship = !onlyUsResident || card.dataset.usResident === 'Yes';
+      var matchesMajor = !selectedMajor || card.dataset.major === selectedMajor;
 
-      if (matchesOption && matchesCitizenship) {
+      if (matchesOption && matchesCitizenship && matchesMajor) {
         card.style.display = '';
         card.classList.remove('dimmed');
         visible++;
@@ -413,7 +391,7 @@
       }
     });
 
-    studentCount.textContent = visible + ' of ' + STUDENTS.length + ' students shown';
+    studentCount.textContent = visible + ' of ' + totalStudents + ' students shown';
   }
 
   function highlightRequested(faculty) {

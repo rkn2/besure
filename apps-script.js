@@ -39,6 +39,9 @@ function doGet(e) {
   if (action === 'timestamps') {
     return handleTimestamps();
   }
+  if (action === 'students') {
+    return handleStudents();
+  }
 
   var page = (e.parameter.page || '').trim();
   if (!page) {
@@ -208,6 +211,77 @@ function handleReadPlacements() {
   }
 
   return ContentService.createTextOutput(JSON.stringify(placements))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function handleStudents() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheets()[0];
+  var data = sheet.getDataRange().getValues();
+  if (data.length < 2) {
+    return ContentService.createTextOutput(JSON.stringify([]))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  var headers = data[0].map(function(h) { return h.toString().toLowerCase().trim(); });
+
+  var cols = { ts: -1, name: -1, email: -1, gradYear: -1, major: -1, usResident: -1,
+               structures: -1, mechEnergy: -1, lighting: -1, construction: -1,
+               description: -1, facultyPref: -1, resume: -1 };
+
+  for (var j = 0; j < headers.length; j++) {
+    var h = headers[j];
+    if (h === 'timestamp') cols.ts = j;
+    else if (h.indexOf('full name') !== -1 || (h.indexOf('name') !== -1 && h.indexOf('faculty') === -1)) cols.name = j;
+    else if (h.indexOf('email') !== -1) cols.email = j;
+    else if (h.indexOf('graduation') !== -1) cols.gradYear = j;
+    else if (h.indexOf('major') !== -1) cols.major = j;
+    else if (h.indexOf('citizen') !== -1 || h.indexOf('permanent resident') !== -1) cols.usResident = j;
+    else if (h.indexOf('interest in structures') !== -1) cols.structures = j;
+    else if (h.indexOf('mechanical') !== -1 || h.indexOf('energy') !== -1) cols.mechEnergy = j;
+    else if (h.indexOf('lighting') !== -1 || h.indexOf('electrical') !== -1) cols.lighting = j;
+    else if (h.indexOf('interest in construction') !== -1) cols.construction = j;
+    else if (h.indexOf('type of research') !== -1 || h.indexOf('interests you') !== -1) cols.description = j;
+    else if (h.indexOf('faculty member') !== -1) cols.facultyPref = j;
+    else if (h.indexOf('resume') !== -1) cols.resume = j;
+  }
+
+  function parseInterest(val) {
+    if (!val) return null;
+    var s = val.toString().toLowerCase();
+    if (s.indexOf('high') !== -1) return 'High';
+    if (s.indexOf('moderate') !== -1) return 'Moderate';
+    return null;
+  }
+
+  var byEmail = {};
+  for (var i = 1; i < data.length; i++) {
+    var email = cols.email !== -1 ? (data[i][cols.email] || '').toString().trim() : '';
+    if (!email) continue;
+
+    byEmail[email.toLowerCase()] = {
+      name: cols.name !== -1 ? (data[i][cols.name] || '').toString().trim() : '',
+      email: email,
+      gradYear: cols.gradYear !== -1 ? (parseInt(data[i][cols.gradYear]) || null) : null,
+      major: cols.major !== -1 ? (data[i][cols.major] || '').toString().trim() : '',
+      usResident: cols.usResident !== -1 ? (data[i][cols.usResident] || '').toString().trim() || null : null,
+      interests: {
+        'Structures': parseInterest(cols.structures !== -1 ? data[i][cols.structures] : null),
+        'Mechanical / Energy': parseInterest(cols.mechEnergy !== -1 ? data[i][cols.mechEnergy] : null),
+        'Lighting / Electrical': parseInterest(cols.lighting !== -1 ? data[i][cols.lighting] : null),
+        'Construction': parseInterest(cols.construction !== -1 ? data[i][cols.construction] : null)
+      },
+      description: cols.description !== -1 ? (data[i][cols.description] || '').toString().trim() : '',
+      facultyPref: cols.facultyPref !== -1 ? (data[i][cols.facultyPref] || '').toString().trim() : '',
+      resume: cols.resume !== -1 ? (data[i][cols.resume] || '').toString().trim() || null : null,
+      applied: cols.ts !== -1 && data[i][cols.ts]
+        ? (data[i][cols.ts] instanceof Date ? data[i][cols.ts].toISOString() : data[i][cols.ts].toString())
+        : null
+    };
+  }
+
+  var result = Object.keys(byEmail).map(function(k) { return byEmail[k]; });
+  return ContentService.createTextOutput(JSON.stringify(result))
     .setMimeType(ContentService.MimeType.JSON);
 }
 
