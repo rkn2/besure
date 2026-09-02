@@ -154,6 +154,11 @@
     <div class="filter-bar" id="filter-bar"></div>
 
     <div class="checkbox-filter">
+      <input type="checkbox" id="requested-filter" disabled>
+      <label for="requested-filter">Requested you</label>
+    </div>
+
+    <div class="checkbox-filter">
       <input type="checkbox" id="us-resident-filter">
       <label for="us-resident-filter">US citizen / permanent resident only</label>
     </div>
@@ -209,6 +214,7 @@
   var studentList = document.getElementById('student-list');
   var studentCount = document.getElementById('student-count');
   var activeFilters = new Set();
+  var requestedFilter = document.getElementById('requested-filter');
   var usResidentFilter = document.getElementById('us-resident-filter');
   var majorSelect = document.getElementById('major-select');
   var totalStudents = 0;
@@ -259,6 +265,7 @@
   setAllActive();
 
   // Events
+  requestedFilter.addEventListener('change', function () { applyFilters(); });
   usResidentFilter.addEventListener('change', function () { applyFilters(); });
   majorSelect.addEventListener('change', function () { applyFilters(); });
 
@@ -388,9 +395,13 @@
     if (!faculty) {
       setAllActive();
       clearRequestedBadges();
+      requestedFilter.checked = false;
+      requestedFilter.disabled = true;
       applyFilters();
       return;
     }
+
+    requestedFilter.disabled = false;
 
     var opts = FACULTY_OPTIONS[faculty] || [];
     activeFilters.clear();
@@ -439,6 +450,7 @@
   function applyFilters() {
     var showAll = activeFilters.has('all');
     var faculty = facultySelect.value;
+    var onlyRequested = requestedFilter.checked;
     var onlyUsResident = usResidentFilter.checked;
     var selectedMajor = majorSelect.value;
     var visible = 0;
@@ -451,10 +463,11 @@
         card.dataset.facultyPref.toLowerCase().indexOf(faculty.split(' ').pop().toLowerCase()) !== -1;
 
       var matchesOption = matchesFilter || requestedByFaculty;
+      var matchesRequested = !onlyRequested || requestedByFaculty;
       var matchesCitizenship = !onlyUsResident || card.dataset.usResident === 'Yes';
       var matchesMajor = !selectedMajor || card.dataset.major === selectedMajor;
 
-      if (matchesOption && matchesCitizenship && matchesMajor) {
+      if (matchesOption && matchesRequested && matchesCitizenship && matchesMajor) {
         card.style.display = '';
         card.classList.remove('dimmed');
         visible++;
