@@ -160,6 +160,42 @@ function createOnboardingDraft(studentName, studentEmail, piName, funding) {
   GmailApp.createDraft(FINANCE_EMAIL, subject, body, { cc: cc });
 }
 
+// ── Process pending introductions from website ───────────────────
+
+function processPendingIntroductions() {
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sheet = ss.getSheetByName('Pending Introductions');
+  if (!sheet) return;
+
+  var data = sheet.getDataRange().getValues();
+  if (data.length < 2) return;
+
+  for (var i = 1; i < data.length; i++) {
+    var sent = (data[i][4] || '').toString().trim();
+    if (sent) continue;
+
+    var studentName = (data[i][1] || '').toString().trim();
+    var studentEmail = (data[i][2] || '').toString().trim();
+    var facultyName = (data[i][3] || '').toString().trim();
+
+    if (!studentName || !facultyName || !studentEmail) continue;
+
+    var piEmail = FACULTY_EMAILS[facultyName] || '';
+    var subject = 'AE Research Scholars — Introduction to ' + facultyName;
+    var body = 'Hi ' + studentName.split(' ')[0] + ',\n\n' +
+      'I am reaching out from the AE Research Scholars program to let you know that ' +
+      facultyName + ' is interested in working with you as an undergraduate researcher.\n\n' +
+      'Please reach out to them directly to discuss this further, either via email or in person. ' +
+      'They are CC\'d on this email.\n\n' +
+      'Let me know if you have any questions!\n\n' +
+      'Best,\nBecca Napolitano\nAE Research Scholars Program';
+
+    var cc = [ADMIN_EMAIL, piEmail].filter(Boolean).join(',');
+    GmailApp.sendEmail(studentEmail, subject, body, { cc: cc });
+    sheet.getRange(i + 1, 5).setValue(new Date().toISOString());
+  }
+}
+
 // ── Process pending onboarding from website ────────────────────────
 
 function processPendingOnboarding() {
