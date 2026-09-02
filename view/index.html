@@ -280,8 +280,12 @@
 
   // Fetch students from Google Sheet
   fetch(SCRIPT_URL + '?action=students')
-    .then(function (r) { return r.json(); })
+    .then(function (r) {
+      if (!r.ok) console.error('Fetch failed:', r.status, r.statusText);
+      return r.json();
+    })
     .then(function (students) {
+      console.log('Loaded ' + students.length + ' students');
       totalStudents = students.length;
 
       // Build major dropdown from unique values
@@ -373,7 +377,8 @@
         applyFilters();
       }
     })
-    .catch(function () {
+    .catch(function (err) {
+      console.error('Student load error:', err);
       studentCount.textContent = 'Could not load applicants.';
     });
 
