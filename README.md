@@ -69,6 +69,12 @@ There are two Google Apps Scripts that work together:
 | `processPendingIntroductions` | Time-driven, Minutes timer | Every 5 minutes |
 | `processPendingOnboarding` | Time-driven, Minutes timer | Every 5 minutes |
 
+## Resumes
+
+Student resumes are uploaded via the Google Form and stored in a Google Drive folder ("AE Research Scholars (File responses)"). The folder is shared as "Anyone with the link can view" so faculty can click "View Resume" on student cards without requesting access. The resume links are unguessable URLs only visible on the faculty-facing cohort page.
+
+If the folder permissions get reset (e.g., after re-creating the form), re-share the folder: Google Drive > find "AE Research Scholars (File responses)" > Share > "Anyone with the link" > Viewer.
+
 ## Emails sent
 
 ### Introduction email (on "Emailed")
