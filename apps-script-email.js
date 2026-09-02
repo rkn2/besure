@@ -57,18 +57,29 @@ function processAcceptanceEmails() {
   threads.forEach(function(thread) {
     var messages = thread.getMessages();
     var latest = messages[messages.length - 1];
-    var body = latest.getPlainBody() || '';
-    var lines = body.split(/\r?\n/);
-    var match = null;
-    for (var li = 0; li < lines.length; li++) {
-      var trimmed = lines[li].trim();
-      if (trimmed) {
-        match = trimmed.match(/^(.+?)\s*\/\s*(.+)$/);
-        if (match) break;
+
+    function findMatch(text) {
+      var lines = text.split(/\r?\n/);
+      for (var li = 0; li < lines.length; li++) {
+        var trimmed = lines[li].trim();
+        if (!trimmed || /^[-=_>]/.test(trimmed) || /^(from|sent|to|cc|subject|date):/i.test(trimmed)) continue;
+        var m = trimmed.match(/^(.+?)\s*\/\s*(.+)$/);
+        if (m) return m;
       }
+      return null;
+    }
+
+    var match = findMatch(latest.getPlainBody() || '');
+
+    if (!match) {
+      var html = latest.getBody() || '';
+      var text = html.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '').replace(/&nbsp;/gi, ' ').replace(/&amp;/gi, '&');
+      match = findMatch(text);
     }
 
     if (!match) {
+      Logger.log('Could not parse. Plain body: ' + (latest.getPlainBody() || '').substring(0, 500));
+      Logger.log('HTML body: ' + (latest.getBody() || '').substring(0, 500));
       latest.reply(
         'Could not parse names.\n' +
         'Type "Student Name / PI Name" on the first line when forwarding.');
