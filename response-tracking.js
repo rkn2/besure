@@ -167,6 +167,7 @@
         '</div>' +
         '<div class="dept-match-radios" style="margin-bottom:0.4rem;font-size:0.85rem;">' +
           '<label style="display:block;font-weight:500;margin-bottom:0.3rem;">Department match semester:</label>' +
+          '<p style="font-size:0.75rem;color:var(--text-secondary);margin:0 0 0.3rem;">Select the semester the AE department will fund. You provide your IO number for the other semester.</p>' +
           '<label class="radio-label"><input type="radio" name="deptMatchPeriod" value="1" checked> <span class="dept-match-label-1">Fall</span></label> ' +
           '<label class="radio-label"><input type="radio" name="deptMatchPeriod" value="2"> <span class="dept-match-label-2">Spring</span></label> ' +
           '<label class="radio-label"><input type="radio" name="deptMatchPeriod" value="none"> None</label>' +
@@ -223,7 +224,8 @@
       } else {
         piFundRow.style.display = '';
         bothFundsRow.style.display = 'none';
-        piFundInput.placeholder = 'IO number';
+        var otherLabel = match === '1' ? labels[1] : labels[0];
+        piFundInput.placeholder = otherLabel + ' — your IO number';
       }
     }
 
