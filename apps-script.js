@@ -111,7 +111,7 @@ function handleSubmit(e, page) {
 
   if (status === 'Accepted') {
     var funding = lookupFunding(studentEmail, facultyName);
-    var returning = isReturningScholar(studentEmail);
+    var returning = isReturningScholar(studentEmail, studentName);
     var pendingSheet = getOrCreateSheet('Pending Onboarding',
       ['Timestamp', 'Student Name', 'Student Email', 'Faculty Name',
        'Label 1', 'Fund 1', 'Label 2', 'Fund 2', 'Sent', 'Returning']);
@@ -210,22 +210,38 @@ function handleTimestamps() {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-function isReturningScholar(studentEmail) {
+function normalizeName(raw) {
+  var s = raw.toString().trim().toLowerCase().replace(/\s+/g, ' ');
+  if (s.indexOf(',') !== -1) {
+    var parts = s.split(',');
+    s = parts[1].trim() + ' ' + parts[0].trim();
+  }
+  return s;
+}
+
+function isReturningScholar(studentEmail, studentName) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var emailLower = studentEmail.toLowerCase();
+  var nameLower = normalizeName(studentName);
 
   // Check "Previous Scholars" sheet (imported from prevScholar.xlsx)
   var prevSheet = ss.getSheetByName('Previous Scholars');
   if (prevSheet) {
     var prevData = prevSheet.getDataRange().getValues();
     var prevHeaders = prevData[0].map(function(h) { return h.toString().toLowerCase().trim(); });
-    var prevEmailCol = -1;
+    var prevEmailCol = -1, prevNameCol = -1;
     for (var j = 0; j < prevHeaders.length; j++) {
-      if (prevHeaders[j].indexOf('email') !== -1) { prevEmailCol = j; break; }
+      if (prevHeaders[j].indexOf('email') !== -1) prevEmailCol = j;
+      if (prevHeaders[j].indexOf('student name') !== -1 || prevHeaders[j] === 'name') prevNameCol = j;
     }
-    if (prevEmailCol !== -1) {
-      for (var i = 1; i < prevData.length; i++) {
-        if ((prevData[i][prevEmailCol] || '').toString().trim().toLowerCase() === emailLower) return true;
+    for (var i = 1; i < prevData.length; i++) {
+      if (prevEmailCol !== -1) {
+        var prevEmail = (prevData[i][prevEmailCol] || '').toString().trim().toLowerCase();
+        if (prevEmail && prevEmail === emailLower) return true;
+      }
+      if (prevNameCol !== -1) {
+        var prevName = normalizeName(prevData[i][prevNameCol] || '');
+        if (prevName && prevName === nameLower) return true;
       }
     }
   }
@@ -236,6 +252,7 @@ function isReturningScholar(studentEmail) {
     var plData = placementSheet.getDataRange().getValues();
     for (var k = 1; k < plData.length; k++) {
       if ((plData[k][2] || '').toString().trim().toLowerCase() === emailLower) return true;
+      if (normalizeName(plData[k][1] || '') === nameLower) return true;
     }
   }
 
