@@ -117,6 +117,12 @@ function handleSubmit(e, page) {
        'Label 1', 'Fund 1', 'Label 2', 'Fund 2', 'Sent', 'Returning']);
     pendingSheet.appendRow([new Date(), studentName, studentEmail, facultyName,
       funding.label1, funding.fund1, funding.label2, funding.fund2, '', returning ? 'Yes' : 'No']);
+
+    // Add to Previous Scholars if not already there
+    if (!returning) {
+      var prevSheet = getOrCreateSheet('Previous Scholars', ['student name']);
+      prevSheet.appendRow([studentName]);
+    }
   }
 
   return ContentService.createTextOutput(JSON.stringify({ success: true }))
