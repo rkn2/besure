@@ -111,11 +111,12 @@ function handleSubmit(e, page) {
 
   if (status === 'Accepted') {
     var funding = lookupFunding(studentEmail, facultyName);
+    var returning = isReturningScholar(studentEmail);
     var pendingSheet = getOrCreateSheet('Pending Onboarding',
       ['Timestamp', 'Student Name', 'Student Email', 'Faculty Name',
-       'Label 1', 'Fund 1', 'Label 2', 'Fund 2', 'Sent']);
+       'Label 1', 'Fund 1', 'Label 2', 'Fund 2', 'Sent', 'Returning']);
     pendingSheet.appendRow([new Date(), studentName, studentEmail, facultyName,
-      funding.label1, funding.fund1, funding.label2, funding.fund2, '']);
+      funding.label1, funding.fund1, funding.label2, funding.fund2, '', returning ? 'Yes' : 'No']);
   }
 
   return ContentService.createTextOutput(JSON.stringify({ success: true }))
@@ -207,6 +208,38 @@ function handleTimestamps() {
 
   return ContentService.createTextOutput(JSON.stringify(result))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+function isReturningScholar(studentEmail) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var emailLower = studentEmail.toLowerCase();
+
+  // Check "Previous Scholars" sheet (imported from prevScholar.xlsx)
+  var prevSheet = ss.getSheetByName('Previous Scholars');
+  if (prevSheet) {
+    var prevData = prevSheet.getDataRange().getValues();
+    var prevHeaders = prevData[0].map(function(h) { return h.toString().toLowerCase().trim(); });
+    var prevEmailCol = -1;
+    for (var j = 0; j < prevHeaders.length; j++) {
+      if (prevHeaders[j].indexOf('email') !== -1) { prevEmailCol = j; break; }
+    }
+    if (prevEmailCol !== -1) {
+      for (var i = 1; i < prevData.length; i++) {
+        if ((prevData[i][prevEmailCol] || '').toString().trim().toLowerCase() === emailLower) return true;
+      }
+    }
+  }
+
+  // Check existing Placements sheet for prior entries
+  var placementSheet = ss.getSheetByName(PLACEMENT_SHEET);
+  if (placementSheet) {
+    var plData = placementSheet.getDataRange().getValues();
+    for (var k = 1; k < plData.length; k++) {
+      if ((plData[k][2] || '').toString().trim().toLowerCase() === emailLower) return true;
+    }
+  }
+
+  return false;
 }
 
 function handleReadPlacements() {

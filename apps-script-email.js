@@ -217,6 +217,7 @@ function processPendingOnboarding() {
     var fund1 = (data[i][5] || '').toString().trim();
     var label2 = (data[i][6] || '').toString().trim();
     var fund2 = (data[i][7] || '').toString().trim();
+    var returning = (data[i][9] || '').toString().trim().toLowerCase() === 'yes';
 
     if (!studentName || !facultyName) continue;
 
@@ -241,12 +242,29 @@ function processPendingOnboarding() {
     GmailApp.sendEmail(FINANCE_EMAIL, 'New AE Research Scholar Payroll Information', forwardBody, { cc: payrollCc });
 
     // Welcome email to student (CC: Becca, PI)
+    var firstName = studentName.split(' ')[0];
     var welcomeSubject = 'Welcome to the AE Research Scholars Program!';
-    var welcomeBody = 'Dear ' + studentName.split(' ')[0] + ',\n\n' +
+
+    var hiringParagraph;
+    if (returning) {
+      hiringParagraph = 'The position pays $15/hour, and the average time commitment is about 5 hours per week, though some students work up to 10 hours. ' +
+        'This is something you and your faculty mentor can decide together based on your project and schedule. ' +
+        'Since you are already in the university system from your previous appointment, you do not need to reapply — you\'re all set on the hiring side.';
+    } else {
+      hiringParagraph = 'The position pays $15/hour, and the average time commitment is about 5 hours per week, though some students work up to 10 hours. ' +
+        'This is something you and your faculty mentor can decide together based on your project and schedule. ' +
+        'Please note that you must wait until you are officially in the university system before starting any work. ' +
+        'We need you to apply to the position so we can hire you on our end.\n\n' +
+        'Please go to https://hr.psu.edu/careers and click on the Penn State Student box, then search by the following JOB/REQ number:\n\n' +
+        'REQ_0000072675 — Architectural Engineering - Part-Time BE-Sure Research Assistant\n\n' +
+        'Once you apply, please let Latrisha know so she can finish the hiring process on our end.';
+    }
+
+    var welcomeBody = 'Dear ' + firstName + ',\n\n' +
       'Welcome to the AE Research Scholars program! We are thrilled to have you join us!!\n\n' +
       'To help you get started and stay connected, we have added you to the official AE Research Scholars channel on Microsoft Teams. This channel is our primary hub for communication, where we post important information about graduate school fellowships, research scholarships, professional development events, and other opportunities relevant to your academic and research career!\n\n' +
-      'A key component of the AE Research Scholars program is sharing your work with the broader community. To that end, all student researchers participate in a poster session at the end of each year (April) to present their progress and accomplishments. We will share more details about the poster session as the end of the semester approaches. Since you are starting in the middle of the year, it is your choice if you want to participate in the poster session this year or next year—please talk this through with your faculty mentor.\n\n' +
-      'The position pays $15/hour, and the average time commitment is about 5 hours per week, though some students work up to 10 hours. This is something you and your faculty mentor can decide together based on your project and schedule. Please note that you must wait until you are officially in the university system before starting any work. Latrisha Hough will send you instructions on how to apply for the paid research position through the university system—please keep an eye out for her email.\n\n' +
+      'A key component of the AE Research Scholars program is sharing your work with the broader community. To that end, all student researchers participate in a poster session at the end of each year (April) to present their progress and accomplishments. We will share more details via Teams about this.\n\n' +
+      hiringParagraph + '\n\n' +
       'In terms of research mentoring and meetings, your faculty mentor is your primary contact. Some students meet weekly, others monthly, and some prefer quick check-ins via Teams. Have a conversation with your mentor about what works best for both of you and your project. If you run into any issues with this, please reach back out to me—I\'m happy to help.\n\n' +
       'We are looking forward to seeing the great work you will do with ' + facultyName + '! Please don\'t hesitate to reach out if you have any questions.\n\n' +
       'Best regards,\nDoc Nap';

@@ -354,12 +354,14 @@
       'This channel is our primary hub for communication, where we post important information about graduate school fellowships, ' +
       'research scholarships, professional development events, and other opportunities relevant to your academic and research career!\r\n\r\n' +
       'A key component of the program is sharing your work with the broader community. To that end, all student researchers participate ' +
-      'in a poster session at the end of each year (April) to present their progress and accomplishments. We will share more details ' +
-      'about the poster session as the end of the semester approaches.\r\n\r\n' +
+      'in a poster session at the end of each year (April) to present their progress and accomplishments. We will share more details via Teams about this.\r\n\r\n' +
       'The position pays $15/hour, and the average time commitment is about 5 hours per week, though some students work up to 10 hours. ' +
-      'This is something you and your faculty mentor can decide together based on your project and schedule. Please note that you must ' +
-      'wait until you are officially in the university system before starting any work. Latrisha Hough will send you instructions on how ' +
-      'to apply for the paid research position through the university system, please keep an eye out for her email.\r\n\r\n' +
+      'This is something you and your faculty mentor can decide together based on your project and schedule. ' +
+      'Please note that you must wait until you are officially in the university system before starting any work. ' +
+      'We need you to apply to the position so we can hire you on our end.\r\n\r\n' +
+      'Please go to https://hr.psu.edu/careers and click on the Penn State Student box, then search by the following JOB/REQ number:\r\n\r\n' +
+      'REQ_0000072675 — Architectural Engineering - Part-Time BE-Sure Research Assistant\r\n\r\n' +
+      'Once you apply, please let Latrisha know so she can finish the hiring process on our end.\r\n\r\n' +
       'In terms of research mentoring and meetings, your faculty mentor is your primary contact. Some students meet weekly, others monthly, ' +
       'and some prefer quick check-ins via Teams. Have a conversation with your mentor about what works best for both of you and your project. ' +
       'If you run into any issues with this, please reach back out to me, I\'m happy to help.\r\n\r\n' +
