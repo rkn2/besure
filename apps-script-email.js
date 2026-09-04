@@ -270,7 +270,7 @@ function processPendingOnboarding() {
       'We are looking forward to seeing the great work you will do with ' + facultyName + '! Please don\'t hesitate to reach out if you have any questions.\n\n' +
       'Best regards,\nDoc Nap';
 
-    var welcomeCc = [ADMIN_EMAIL, piEmail].filter(Boolean).join(',');
+    var welcomeCc = [ADMIN_EMAIL, piEmail, FINANCE_EMAIL].filter(Boolean).join(',');
     GmailApp.sendEmail(studentEmail, welcomeSubject, welcomeBody, { cc: welcomeCc });
 
     sheet.getRange(i + 1, 9).setValue(new Date().toISOString());
