@@ -14,8 +14,8 @@
 //   3. In Apps Script, go to Triggers (clock icon) → Add Trigger:
 //      Function: processAcceptanceEmails, Time-driven, Minutes timer, Every 5 minutes
 
-var API_KEY = 'PHXFpn_cBMgcMzm7xX0g5IiLjpl4hBDw';
-var WRITE_KEY = 'bQzfL8C12TpxPvfArAd2rrR-0wNb_JJg';
+var API_KEY = 'YOUR_API_KEY_HERE';
+var WRITE_KEY = 'YOUR_WRITE_KEY_HERE';
 var RESPONSE_SHEET = 'Faculty Responses';
 var PLACEMENT_SHEET = 'Placements';
 
@@ -269,16 +269,6 @@ function isReturningScholar(studentEmail, studentName) {
         var prevName = normalizeName(prevData[i][prevNameCol] || '');
         if (prevName && prevName === nameLower) return true;
       }
-    }
-  }
-
-  // Check existing Placements sheet for prior entries
-  var placementSheet = ss.getSheetByName(PLACEMENT_SHEET);
-  if (placementSheet) {
-    var plData = placementSheet.getDataRange().getValues();
-    for (var k = 1; k < plData.length; k++) {
-      if ((plData[k][2] || '').toString().trim().toLowerCase() === emailLower) return true;
-      if (normalizeName(plData[k][1] || '') === nameLower) return true;
     }
   }
 

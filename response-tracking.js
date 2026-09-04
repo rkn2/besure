@@ -5,7 +5,7 @@
 (function () {
   var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxl3x4KWmjHufkroWiXieWjBcACjWxSguj9EjonvpSxPDfVUYhfg88uhnVjRMhXuAJx/exec';
   var WORKER_URL = 'https://besure-api.billowing-sky-6472.workers.dev';
-  var API_KEY = 'PHXFpn_cBMgcMzm7xX0g5IiLjpl4hBDw';
+  var API_KEY = 'U50J4N2YOVeJ1-LaOvlrt9hkQMNJEqet';
   var TURNSTILE_SITE_KEY = '0x4AAAAAAEnLNyAp9kZ_IIzO';
 
   // Inject Turnstile script and invisible widget
