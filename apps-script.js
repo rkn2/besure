@@ -79,10 +79,14 @@ function doGet(e) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
+function sanitize(str) {
+  return str.replace(/[\r\n\t]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
 function handleSubmit(e, page) {
   var studentEmail = (e.parameter.studentEmail || '').trim();
-  var studentName = (e.parameter.studentName || '').trim();
-  var facultyName = (e.parameter.facultyName || '').trim();
+  var studentName = sanitize(e.parameter.studentName || '');
+  var facultyName = sanitize(e.parameter.facultyName || '');
   var status = (e.parameter.status || '').trim();
 
   if (!studentEmail || !facultyName || !status) {

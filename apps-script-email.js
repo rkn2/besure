@@ -33,6 +33,10 @@ var FACULTY_EMAILS = {
   'Juan Pablo Gevaudan': 'j.p.gevaudan@psu.edu'
 };
 
+function sanitize(str) {
+  return str.replace(/[\r\n\t]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
 function getSheet(name, headers) {
   var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = ss.getSheetByName(name);
@@ -176,9 +180,9 @@ function processPendingIntroductions() {
     var sent = (data[i][4] || '').toString().trim();
     if (sent) continue;
 
-    var studentName = (data[i][1] || '').toString().trim();
+    var studentName = sanitize((data[i][1] || '').toString());
     var studentEmail = (data[i][2] || '').toString().trim();
-    var facultyName = (data[i][3] || '').toString().trim();
+    var facultyName = sanitize((data[i][3] || '').toString());
 
     if (!studentName || !facultyName || !studentEmail) continue;
 
@@ -212,9 +216,9 @@ function processPendingOnboarding() {
     var sent = (data[i][8] || '').toString().trim();
     if (sent) continue;
 
-    var studentName = (data[i][1] || '').toString().trim();
+    var studentName = sanitize((data[i][1] || '').toString());
     var studentEmail = (data[i][2] || '').toString().trim();
-    var facultyName = (data[i][3] || '').toString().trim();
+    var facultyName = sanitize((data[i][3] || '').toString());
     var label1 = (data[i][4] || '').toString().trim();
     var fund1 = (data[i][5] || '').toString().trim();
     var label2 = (data[i][6] || '').toString().trim();
