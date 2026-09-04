@@ -89,12 +89,13 @@
 
 <script>
 var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxl3x4KWmjHufkroWiXieWjBcACjWxSguj9EjonvpSxPDfVUYhfg88uhnVjRMhXuAJx/exec';
+var API_KEY = 'PHXFpn_cBMgcMzm7xX0g5IiLjpl4hBDw';
 
 function loadPlacements() {
   var container = document.getElementById('placements-content');
   container.innerHTML = '<p class="loading">Loading placements...</p>';
 
-  fetch(SCRIPT_URL + '?action=placements')
+  fetch(SCRIPT_URL + '?key=' + encodeURIComponent(API_KEY) + '&action=placements')
     .then(function (r) { return r.json(); })
     .then(function (data) {
       if (!data.length) {

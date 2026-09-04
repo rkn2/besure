@@ -14,6 +14,7 @@
 //   3. In Apps Script, go to Triggers (clock icon) → Add Trigger:
 //      Function: processAcceptanceEmails, Time-driven, Minutes timer, Every 5 minutes
 
+var API_KEY = 'PHXFpn_cBMgcMzm7xX0g5IiLjpl4hBDw';
 var RESPONSE_SHEET = 'Faculty Responses';
 var PLACEMENT_SHEET = 'Placements';
 
@@ -28,6 +29,10 @@ function getOrCreateSheet(name, headers) {
 }
 
 function doGet(e) {
+  if ((e.parameter.key || '') !== API_KEY) {
+    return ContentService.createTextOutput(JSON.stringify({ error: 'unauthorized' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
   var action = (e.parameter.action || 'read').trim();
 
   if (action === 'placements') {

@@ -4,6 +4,7 @@
 
 (function () {
   var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxl3x4KWmjHufkroWiXieWjBcACjWxSguj9EjonvpSxPDfVUYhfg88uhnVjRMhXuAJx/exec';
+  var API_KEY = 'PHXFpn_cBMgcMzm7xX0g5IiLjpl4hBDw';
 
   var ADMIN_EMAIL = 'rjn5308@psu.edu';
   var FINANCE_EMAIL = 'ldw5@psu.edu';
@@ -77,7 +78,7 @@
   loadResponses();
 
   function loadResponses() {
-    var url = SCRIPT_URL + '?page=' + encodeURIComponent(pageSlug);
+    var url = SCRIPT_URL + '?key=' + encodeURIComponent(API_KEY) + '&page=' + encodeURIComponent(pageSlug);
     fetch(url)
       .then(function (r) { return r.json(); })
       .then(function (data) {
@@ -261,6 +262,7 @@
       btn.textContent = 'Submitting...';
 
       var params = new URLSearchParams({
+        key: API_KEY,
         action: 'submit',
         page: pageSlug,
         studentEmail: studentEmail,
@@ -278,6 +280,7 @@
       if (status === 'Accepted') {
         var funds = getFundValues();
         var placementParams = new URLSearchParams({
+          key: API_KEY,
           action: 'submitPlacement',
           studentEmail: studentEmail,
           studentName: studentName,

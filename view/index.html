@@ -183,6 +183,7 @@
 <script>
 (function () {
   var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxl3x4KWmjHufkroWiXieWjBcACjWxSguj9EjonvpSxPDfVUYhfg88uhnVjRMhXuAJx/exec';
+  var API_KEY = 'PHXFpn_cBMgcMzm7xX0g5IiLjpl4hBDw';
 
   var FACULTY_OPTIONS = {
     'Nathan Brown': ['Structures'],
@@ -197,6 +198,7 @@
     'Donghyun Rim': ['Mechanical / Energy'],
     'Julian Wang': ['Lighting / Electrical'],
     'Dorukalp Durmus': ['Lighting / Electrical'],
+    'Moses Ling': ['Mechanical / Energy'],
     'John Messner': ['Construction'],
     'Rob Leicht': ['Construction'],
     'Juan Pablo Gevaudan': ['Construction']
@@ -287,7 +289,7 @@
   studentCount.textContent = 'Loading applicants...';
 
   // Fetch students from Google Sheet
-  fetch(SCRIPT_URL + '?action=students')
+  fetch(SCRIPT_URL + '?key=' + encodeURIComponent(API_KEY) + '&action=students')
     .then(function (r) {
       if (!r.ok) console.error('Fetch failed:', r.status, r.statusText);
       return r.json();
