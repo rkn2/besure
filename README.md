@@ -25,7 +25,8 @@ Three statuses, each with an automated action:
 |--------|---------------|--------------|
 | **Interested** | Interested | Logged to sheet. Nothing else. |
 | **Emailed** | Send introduction email to student | Sends an email from `psuaeresearchscholars@gmail.com` to the student introducing them to the faculty member. CC: Becca + PI. Confirmation popup before sending. |
-| **Accepted** | Accept — send payroll to finance | Two emails fire: (1) payroll setup to Latrisha Hough (ldw5@psu.edu), CC Becca + PI; (2) welcome email to the student, CC Becca + PI. Student does not see the finance info. Confirmation popup before sending. |
+| **Accepted** | Accept — send payroll to finance | Two emails fire: (1) payroll setup to Latrisha Hough (ldw5@psu.edu), CC Becca + PI; (2) welcome email to the student, CC Becca + PI + Latrisha. Welcome email varies by new vs. returning student (see below). Student does not see the finance info. Confirmation popup before sending. |
+| **Not interested** | Not interested — remove from my list | Logged to sheet. Removes the faculty member's interest. |
 
 Both "Emailed" and "Accepted" show a confirmation popup so nothing fires by accident.
 
@@ -91,12 +92,22 @@ If the folder permissions get reset (e.g., after re-creating the form), re-share
 - **Subject:** New AE Research Scholar Payroll Information
 - **Body:** Student name, faculty mentor, funding sources with IO numbers
 
-### Welcome email (on "Accepted", sent at the same time as payroll)
+### Welcome email — new student (on "Accepted", sent at the same time as payroll)
 - **From:** psuaeresearchscholars@gmail.com
 - **To:** student
-- **CC:** Becca (rjn5308@psu.edu), PI
+- **CC:** Becca (rjn5308@psu.edu), PI, Latrisha (ldw5@psu.edu)
 - **Subject:** Welcome to the AE Research Scholars Program!
-- **Body:** Teams channel info, poster session, pay rate ($15/hr), wait for Latrisha's onboarding email, meet with your mentor. Signed "Doc Nap."
+- **Body:** Teams channel info, poster session, pay rate ($15/hr), HR application instructions (REQ_0000072675), tells student to let Latrisha know once they apply. Signed "Doc Nap."
+
+### Welcome email — returning student (on "Accepted", sent at the same time as payroll)
+- **From:** psuaeresearchscholars@gmail.com
+- **To:** student
+- **CC:** Becca (rjn5308@psu.edu), PI, Latrisha (ldw5@psu.edu)
+- **Subject:** Welcome to the AE Research Scholars Program!
+- **Body:** Same as new student email, but instead of application instructions, tells them they're already in the system and don't need to reapply.
+
+### Returning student detection
+A student is considered "returning" if their name appears in the **Previous Scholars** sheet in the response tracking spreadsheet or in the existing **Placements** sheet. Name matching normalizes "Last, First" and "First Last" formats. Newly accepted students are automatically added to the Previous Scholars sheet for future rounds.
 
 ## Setup
 
@@ -164,18 +175,20 @@ All faculty get the same link — `https://rkn2.github.io/besure/view/` — sele
 | Rebecca Napolitano | Structures | rjn5308@psu.edu |
 | Tyler Hull | Structures | thull@psu.edu |
 | Botong Zheng | Structures | bbz5226@psu.edu |
+| Mariantonieta Gutierrez Soto | Structures, Construction | mvg5899@psu.edu |
 | Yuqing Hu | Mechanical/Energy, Construction | yfh5204@psu.edu |
 | Greg Pavlak | Mechanical/Energy | gxp93@psu.edu |
 | Wangda Zuo | Mechanical/Energy | wangda.zuo@psu.edu |
 | Jin Wen | Mechanical/Energy | jvw6499@psu.edu |
 | Donghyun Rim | Mechanical/Energy | dxr51@psu.edu |
+| Moses Ling | Mechanical/Energy | mdl5@psu.edu |
 | Julian Wang | Lighting/Electrical | jqw5965@psu.edu |
 | Dorukalp Durmus | Lighting/Electrical | alp@psu.edu |
 | John Messner | Construction | jim101@psu.edu |
 | Rob Leicht | Construction | rml167@psu.edu |
 | Juan Pablo Gevaudan | Construction | j.p.gevaudan@psu.edu |
 
-Faculty emails are maintained in `FACULTY_EMAILS` in both `apps-script.js` and `apps-script-email.js`. Update both when adding/removing faculty.
+Faculty emails are maintained in `FACULTY_EMAILS` in three files: `apps-script.js`, `apps-script-email.js`, and `response-tracking.js`. Update all three when adding/removing faculty, plus `FACULTY_OPTIONS` in `view/index.html`.
 
 ## Key contacts
 
@@ -194,14 +207,22 @@ If a student applied by mistake or needs to be removed:
 3. The website pulls data live from the sheet — they disappear immediately
 
 ### Adding or removing faculty
-Update `FACULTY_EMAILS` in **both** scripts:
+Update `FACULTY_EMAILS` in **all three** scripts:
 - `apps-script.js` (spreadsheet script — redeploy after saving)
 - `apps-script-email.js` (standalone psuaeresearchscholars script — save only, no deploy needed)
+- `response-tracking.js` (client-side — push to GitHub, auto-deploys via Pages)
 
 Also update the `FACULTY_OPTIONS` map in `view/index.html` and the faculty roster table in this README.
 
 ### Resume access issues
 If faculty report needing to "request access" for resumes, the Google Drive subfolder permissions have reset. Fix: Google Drive > search "Please attach a pdf of your resume" > Share > "Anyone with the link" > Viewer. See the Resumes section above.
+
+## Security
+
+- **API key**: All requests to the Apps Script web app require a `key` parameter. The key is in `apps-script.js` (server-side check) and in the client-side files (`response-tracking.js`, `placements.html`, `view/index.html`). It blocks unauthorized API access but is visible in page source — it stops casual abuse, not a determined attacker.
+- **Input sanitization**: Student and faculty names are stripped of newlines/tabs before being used in email bodies to prevent content injection.
+- **Spreadsheet access**: The response tracking spreadsheet is set to Restricted (not public). Only shared accounts can access it directly.
+- **Student PII**: Applicant data (names, emails, citizenship, resumes) is served through the API key-protected endpoint. Resume links use unguessable Google Drive URLs.
 
 ## Admin tools
 
@@ -209,7 +230,7 @@ Admin tools (matching script, Flask dashboard, email templates) live in the priv
 
 ## TODO
 
-- [ ] **Move `FACULTY_EMAILS` to a Google Sheet** — currently hardcoded in both `apps-script.js` and `apps-script-email.js`. Adding/removing faculty requires updating both. Pull from a "Faculty" sheet instead so there's one source of truth.
+- [ ] **Move `FACULTY_EMAILS` to a Google Sheet** — currently hardcoded in `apps-script.js`, `apps-script-email.js`, and `response-tracking.js`. Adding/removing faculty requires updating all three plus `view/index.html`. Pull from a "Faculty" sheet instead so there's one source of truth.
 - [ ] Consider custom subdomain (e.g., `scholars.ae.psu.edu`) — requires CNAME from dept IT pointing to `rkn2.github.io`, then configure in GitHub Pages settings
 - [ ] Consider private hosting for cohort pages (currently public repo with unguessable URLs — fine for now)
 - [ ] Update `generate_cohorts.py` template in `besure-admin` when adding new features to cohort page
