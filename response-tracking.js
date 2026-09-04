@@ -21,6 +21,7 @@
     'Donghyun Rim': 'dxr51@psu.edu',
     'Julian Wang': 'jqw5965@psu.edu',
     'Dorukalp Durmus': 'alp@psu.edu',
+    'Moses Ling': 'mdl5@psu.edu',
     'John Messner': 'jim101@psu.edu',
     'Rob Leicht': 'rml167@psu.edu',
     'Juan Pablo Gevaudan': 'j.p.gevaudan@psu.edu'
