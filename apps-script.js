@@ -15,6 +15,7 @@
 //      Function: processAcceptanceEmails, Time-driven, Minutes timer, Every 5 minutes
 
 var API_KEY = 'PHXFpn_cBMgcMzm7xX0g5IiLjpl4hBDw';
+var WRITE_KEY = 'bQzfL8C12TpxPvfArAd2rrR-0wNb_JJg';
 var RESPONSE_SHEET = 'Faculty Responses';
 var PLACEMENT_SHEET = 'Placements';
 
@@ -29,11 +30,21 @@ function getOrCreateSheet(name, headers) {
 }
 
 function doGet(e) {
-  if ((e.parameter.key || '') !== API_KEY) {
-    return ContentService.createTextOutput(JSON.stringify({ error: 'unauthorized' }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
+  var key = e.parameter.key || '';
   var action = (e.parameter.action || 'read').trim();
+
+  var WRITE_ACTIONS = { submit: true, submitPlacement: true };
+  if (WRITE_ACTIONS[action]) {
+    if (key !== WRITE_KEY) {
+      return ContentService.createTextOutput(JSON.stringify({ error: 'unauthorized' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+  } else {
+    if (key !== API_KEY && key !== WRITE_KEY) {
+      return ContentService.createTextOutput(JSON.stringify({ error: 'unauthorized' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+  }
 
   if (action === 'placements') {
     return handleReadPlacements();
