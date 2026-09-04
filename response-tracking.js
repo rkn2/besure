@@ -6,6 +6,47 @@
   var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxl3x4KWmjHufkroWiXieWjBcACjWxSguj9EjonvpSxPDfVUYhfg88uhnVjRMhXuAJx/exec';
   var WORKER_URL = 'https://besure-api.billowing-sky-6472.workers.dev';
   var API_KEY = 'PHXFpn_cBMgcMzm7xX0g5IiLjpl4hBDw';
+  var TURNSTILE_SITE_KEY = '0x4AAAAAAEnLNyAp9kZ_IIzO';
+
+  // Inject Turnstile script and invisible widget
+  var tsScript = document.createElement('script');
+  tsScript.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+  tsScript.async = true;
+  document.head.appendChild(tsScript);
+
+  var tsContainer = document.createElement('div');
+  tsContainer.id = 'turnstile-container';
+  tsContainer.style.display = 'none';
+  document.body.appendChild(tsContainer);
+
+  var turnstileWidgetId = null;
+  var turnstileReady = new Promise(function (resolve) {
+    tsScript.onload = function () {
+      turnstileWidgetId = turnstile.render('#turnstile-container', {
+        sitekey: TURNSTILE_SITE_KEY,
+        size: 'invisible',
+        callback: function () { resolve(); },
+      });
+    };
+  });
+
+  function getTurnstileToken() {
+    return turnstileReady.then(function () {
+      var token = turnstile.getResponse(turnstileWidgetId);
+      if (token) return token;
+      turnstile.reset(turnstileWidgetId);
+      return new Promise(function (resolve) {
+        var check = setInterval(function () {
+          var t = turnstile.getResponse(turnstileWidgetId);
+          if (t) { clearInterval(check); resolve(t); }
+        }, 100);
+      });
+    });
+  }
+
+  function resetTurnstile() {
+    if (turnstileWidgetId !== null) turnstile.reset(turnstileWidgetId);
+  }
 
   var ADMIN_EMAIL = 'rjn5308@psu.edu';
   var FINANCE_EMAIL = 'ldw5@psu.edu';
@@ -262,25 +303,13 @@
       btn.disabled = true;
       btn.textContent = 'Submitting...';
 
-      var params = new URLSearchParams({
-        action: 'submit',
-        page: pageSlug,
-        studentEmail: studentEmail,
-        studentName: studentName,
-        facultyName: faculty,
-        status: status
-      });
-
-      var submitStatus = function () {
-        return fetch(WORKER_URL + '?' + params.toString())
-          .then(function (r) { return r.json(); });
-      };
-
-      var chain;
+      getTurnstileToken().then(function (tsToken) {
+      var params;
       if (status === 'Accepted') {
         var funds = getFundValues();
-        var placementParams = new URLSearchParams({
-          action: 'submitPlacement',
+        params = new URLSearchParams({
+          action: 'acceptAndPlace',
+          page: pageSlug,
           studentEmail: studentEmail,
           studentName: studentName,
           facultyName: faculty,
@@ -288,19 +317,25 @@
           label1: funds.label1,
           label2: funds.label2,
           fund1: funds.fund1,
-          fund2: funds.fund2
+          fund2: funds.fund2,
+          'cf-turnstile-response': tsToken
         });
-        chain = fetch(WORKER_URL + '?' + placementParams.toString())
-          .then(function (r) { return r.json(); })
-          .then(function (placementResult) {
-            if (!placementResult.success) throw new Error(placementResult.error || 'Placement failed');
-            return submitStatus();
-          });
       } else {
-        chain = submitStatus();
+        params = new URLSearchParams({
+          action: 'submit',
+          page: pageSlug,
+          studentEmail: studentEmail,
+          studentName: studentName,
+          facultyName: faculty,
+          status: status,
+          'cf-turnstile-response': tsToken
+        });
       }
 
-      chain
+      return fetch(WORKER_URL + '?' + params.toString())
+        .then(function (r) { return r.json(); });
+      })
+      .then(function (result) { resetTurnstile(); return result; })
         .then(function (result) {
           if (result.success) {
             msg.className = 'response-msg response-msg--ok';

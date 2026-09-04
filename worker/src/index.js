@@ -1,5 +1,25 @@
 var ALLOWED_ORIGINS = ['https://rkn2.github.io'];
-var WRITE_ACTIONS = { submit: true, submitPlacement: true };
+var WRITE_ACTIONS = { submit: true, submitPlacement: true, acceptAndPlace: true };
+
+async function verifyTurnstile(token, ip, env) {
+  var resp = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'secret=' + encodeURIComponent(env.TURNSTILE_SECRET) + '&response=' + encodeURIComponent(token) + '&remoteip=' + encodeURIComponent(ip),
+  });
+  var result = await resp.json();
+  return result.success === true;
+}
+
+async function callAppsScript(params, env) {
+  var target = new URL(env.APPS_SCRIPT_URL);
+  Object.keys(params).forEach(function (k) {
+    target.searchParams.set(k, params[k]);
+  });
+  target.searchParams.set('key', env.WRITE_KEY);
+  var resp = await fetch(target.toString(), { redirect: 'follow' });
+  return resp.json();
+}
 
 export default {
   async fetch(request, env) {
@@ -32,17 +52,60 @@ export default {
       });
     }
 
-    var target = new URL(env.APPS_SCRIPT_URL);
+    var token = url.searchParams.get('cf-turnstile-response') || '';
+    if (!token) {
+      return new Response(JSON.stringify({ error: 'missing turnstile token' }), {
+        status: 403,
+        headers: Object.assign({ 'Content-Type': 'application/json' }, corsHeaders),
+      });
+    }
+
+    var ip = request.headers.get('CF-Connecting-IP') || '';
+    var valid = await verifyTurnstile(token, ip, env);
+    if (!valid) {
+      return new Response(JSON.stringify({ error: 'turnstile verification failed' }), {
+        status: 403,
+        headers: Object.assign({ 'Content-Type': 'application/json' }, corsHeaders),
+      });
+    }
+
+    var headers = Object.assign({ 'Content-Type': 'application/json' }, corsHeaders);
+
+    if (action === 'acceptAndPlace') {
+      var placementResult = await callAppsScript({
+        action: 'submitPlacement',
+        studentEmail: url.searchParams.get('studentEmail') || '',
+        studentName: url.searchParams.get('studentName') || '',
+        facultyName: url.searchParams.get('facultyName') || '',
+        periodType: url.searchParams.get('periodType') || '',
+        label1: url.searchParams.get('label1') || '',
+        label2: url.searchParams.get('label2') || '',
+        fund1: url.searchParams.get('fund1') || '',
+        fund2: url.searchParams.get('fund2') || '',
+      }, env);
+
+      if (!placementResult.success) {
+        return new Response(JSON.stringify(placementResult), { headers: headers });
+      }
+
+      var submitResult = await callAppsScript({
+        action: 'submit',
+        page: url.searchParams.get('page') || '',
+        studentEmail: url.searchParams.get('studentEmail') || '',
+        studentName: url.searchParams.get('studentName') || '',
+        facultyName: url.searchParams.get('facultyName') || '',
+        status: 'Accepted',
+      }, env);
+
+      return new Response(JSON.stringify(submitResult), { headers: headers });
+    }
+
+    var params = {};
     url.searchParams.forEach(function (v, k) {
-      if (k !== 'key') target.searchParams.set(k, v);
+      if (k !== 'cf-turnstile-response') params[k] = v;
     });
-    target.searchParams.set('key', env.WRITE_KEY);
+    var result = await callAppsScript(params, env);
 
-    var resp = await fetch(target.toString(), { redirect: 'follow' });
-    var body = await resp.text();
-
-    return new Response(body, {
-      headers: Object.assign({ 'Content-Type': 'application/json' }, corsHeaders),
-    });
+    return new Response(JSON.stringify(result), { headers: headers });
   },
 };
