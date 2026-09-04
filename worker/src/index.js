@@ -15,6 +15,13 @@ export default {
       return new Response(null, { headers: corsHeaders });
     }
 
+    if (!allowed) {
+      return new Response(JSON.stringify({ error: 'forbidden' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     var url = new URL(request.url);
     var action = url.searchParams.get('action') || '';
 
