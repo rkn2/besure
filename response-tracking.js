@@ -4,8 +4,8 @@
 
 (function () {
   var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxl3x4KWmjHufkroWiXieWjBcACjWxSguj9EjonvpSxPDfVUYhfg88uhnVjRMhXuAJx/exec';
+  var WORKER_URL = 'https://besure-api.billowing-sky-6472.workers.dev';
   var API_KEY = 'PHXFpn_cBMgcMzm7xX0g5IiLjpl4hBDw';
-  var WRITE_KEY = 'bQzfL8C12TpxPvfArAd2rrR-0wNb_JJg';
 
   var ADMIN_EMAIL = 'rjn5308@psu.edu';
   var FINANCE_EMAIL = 'ldw5@psu.edu';
@@ -263,7 +263,6 @@
       btn.textContent = 'Submitting...';
 
       var params = new URLSearchParams({
-        key: WRITE_KEY,
         action: 'submit',
         page: pageSlug,
         studentEmail: studentEmail,
@@ -273,7 +272,7 @@
       });
 
       var submitStatus = function () {
-        return fetch(SCRIPT_URL + '?' + params.toString())
+        return fetch(WORKER_URL + '?' + params.toString())
           .then(function (r) { return r.json(); });
       };
 
@@ -281,7 +280,6 @@
       if (status === 'Accepted') {
         var funds = getFundValues();
         var placementParams = new URLSearchParams({
-          key: WRITE_KEY,
           action: 'submitPlacement',
           studentEmail: studentEmail,
           studentName: studentName,
@@ -292,7 +290,7 @@
           fund1: funds.fund1,
           fund2: funds.fund2
         });
-        chain = fetch(SCRIPT_URL + '?' + placementParams.toString())
+        chain = fetch(WORKER_URL + '?' + placementParams.toString())
           .then(function (r) { return r.json(); })
           .then(function (placementResult) {
             if (!placementResult.success) throw new Error(placementResult.error || 'Placement failed');
