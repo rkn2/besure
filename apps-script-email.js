@@ -33,6 +33,19 @@ var FACULTY_EMAILS = {
   'Juan Pablo Gevaudan': 'j.p.gevaudan@psu.edu'
 };
 
+var FACULTY_ALIASES = {
+  'doc nap': 'rebecca napolitano',
+  'dr nap': 'rebecca napolitano',
+  'dr. nap': 'rebecca napolitano',
+  'becca napolitano': 'rebecca napolitano',
+  'becca': 'rebecca napolitano'
+};
+
+function resolveFacultyName(name) {
+  var key = name.toLowerCase().replace(/\.\s*/g, '. ').trim();
+  return FACULTY_ALIASES[key] || key;
+}
+
 function sanitize(str) {
   return str.replace(/[\r\n\t]/g, ' ').replace(/\s+/g, ' ').trim();
 }
@@ -94,13 +107,13 @@ function processAcceptanceEmails() {
     var studentName = match[1].trim();
     var piName = match[2].trim();
     var studentNameLower = studentName.toLowerCase();
-    var piNameLower = piName.toLowerCase();
+    var piNameLower = resolveFacultyName(piName);
 
     var foundRow = -1;
     var studentEmail = '';
     for (var i = 1; i < data.length; i++) {
       var rowStudent = (data[i][3] || '').toString().trim().toLowerCase();
-      var rowFaculty = (data[i][4] || '').toString().trim().toLowerCase();
+      var rowFaculty = resolveFacultyName((data[i][4] || '').toString().trim());
       if (rowStudent === studentNameLower && rowFaculty === piNameLower) {
         foundRow = i;
         studentEmail = (data[i][2] || '').toString().trim();
@@ -161,9 +174,28 @@ function createOnboardingDraft(studentName, studentEmail, piName, funding) {
     'Please let me know if you need any additional information to get them set up in the system!\n\n' +
     'Thanks,\nBecca';
 
+  var htmlFund1 = funding.fund1
+    ? ('<li>Funding Source 1: ' + funding.label1 + ' on IO <strong>' + funding.fund1 + '</strong></li>')
+    : '<li>Funding Source 1: TBD</li>';
+  var htmlFund2 = funding.fund2
+    ? ('<li>Funding Source 2: ' + funding.label2 + ' on IO <strong>' + funding.fund2 + '</strong></li>')
+    : '<li>Funding Source 2: TBD</li>';
+
+  var htmlBody = '<div style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.6;color:#333">' +
+    '<p>Hi Latrisha, this email is to confirm the payroll details for our new student researcher:</p>' +
+    '<ul style="margin:8px 0 16px">' +
+    '<li>Student: <strong>' + studentName + '</strong></li>' +
+    '<li>Faculty Mentor/Supervisor: <strong>' + piName + '</strong> (They will be responsible for approving their hours).</li>' +
+    htmlFund1 +
+    htmlFund2 +
+    '</ul>' +
+    '<p>Please let me know if you need any additional information to get them set up in the system!</p>' +
+    '<p>Thanks,<br>Becca</p>' +
+    '</div>';
+
   var cc = [piEmail, studentEmail].filter(function(e) { return e; }).join(',');
 
-  GmailApp.createDraft(FINANCE_EMAIL, subject, body, { cc: cc });
+  GmailApp.createDraft(FINANCE_EMAIL, subject, body, { cc: cc, htmlBody: htmlBody });
 }
 
 // ── Process pending introductions from website ───────────────────
@@ -187,8 +219,9 @@ function processPendingIntroductions() {
     if (!studentName || !facultyName || !studentEmail) continue;
 
     var piEmail = FACULTY_EMAILS[facultyName] || '';
+    var firstName = studentName.split(' ')[0];
     var subject = 'AE Research Scholars — Introduction to ' + facultyName;
-    var body = 'Hi ' + studentName.split(' ')[0] + ',\n\n' +
+    var body = 'Hi ' + firstName + ',\n\n' +
       'I am reaching out from the AE Research Scholars program to let you know that ' +
       facultyName + ' is interested in working with you as an undergraduate researcher.\n\n' +
       'Please reach out to them directly to discuss this further, either via email or in person. ' +
@@ -196,8 +229,17 @@ function processPendingIntroductions() {
       'Let me know if you have any questions!\n\n' +
       'Best,\nBecca Napolitano\nAE Research Scholars Program';
 
+    var htmlBody = '<div style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.6;color:#333">' +
+      '<p>Hi ' + firstName + ',</p>' +
+      '<p>I am reaching out from the AE Research Scholars program to let you know that <strong>' +
+      facultyName + '</strong> is interested in working with you as an undergraduate researcher.</p>' +
+      '<p>Please reach out to them directly to discuss this further, either via email or in person. They are CC\'d on this email.</p>' +
+      '<p>Let me know if you have any questions!</p>' +
+      '<p>Best,<br>Becca Napolitano<br>AE Research Scholars Program</p>' +
+      '</div>';
+
     var cc = [ADMIN_EMAIL, piEmail].filter(Boolean).join(',');
-    GmailApp.sendEmail(studentEmail, subject, body, { cc: cc });
+    GmailApp.sendEmail(studentEmail, subject, body, { cc: cc, htmlBody: htmlBody });
     sheet.getRange(i + 1, 5).setValue(new Date().toISOString());
   }
 }
@@ -243,19 +285,42 @@ function processPendingOnboarding() {
       'Please let me know if you need any additional information to get them set up in the system!\n\n' +
       'Thanks,\nBecca';
 
+    var htmlFundLine1 = fund1
+      ? ('<li>Funding Source 1: ' + label1 + ' on IO <strong>' + fund1 + '</strong></li>')
+      : '<li>Funding Source 1: TBD</li>';
+    var htmlFundLine2 = fund2
+      ? ('<li>Funding Source 2: ' + label2 + ' on IO <strong>' + fund2 + '</strong></li>')
+      : '<li>Funding Source 2: TBD</li>';
+
+    var forwardHtml = '<div style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.6;color:#333">' +
+      '<p>Hi Latrisha, this email is to confirm the payroll details for our new student researcher:</p>' +
+      '<ul style="margin:8px 0 16px">' +
+      '<li>Student: <strong>' + studentName + '</strong></li>' +
+      '<li>Faculty Mentor/Supervisor: <strong>' + facultyName + '</strong> (They will be responsible for approving their hours).</li>' +
+      htmlFundLine1 +
+      htmlFundLine2 +
+      '</ul>' +
+      '<p>Please let me know if you need any additional information to get them set up in the system!</p>' +
+      '<p>Thanks,<br>Becca</p>' +
+      '</div>';
+
     // Payroll email to Latrisha (CC: Becca, PI — no student)
     var payrollCc = [ADMIN_EMAIL, piEmail].filter(Boolean).join(',');
-    GmailApp.sendEmail(FINANCE_EMAIL, 'New AE Research Scholar Payroll Information', forwardBody, { cc: payrollCc });
+    GmailApp.sendEmail(FINANCE_EMAIL, 'New AE Research Scholar Payroll Information', forwardBody, { cc: payrollCc, htmlBody: forwardHtml });
 
     // Welcome email to student (CC: Becca, PI)
     var firstName = studentName.split(' ')[0];
     var welcomeSubject = 'Welcome to the AE Research Scholars Program!';
 
     var hiringParagraph;
+    var hiringHtml;
     if (returning) {
       hiringParagraph = 'The position pays $15/hour, and the average time commitment is about 5 hours per week, though some students work up to 10 hours. ' +
         'This is something you and your faculty mentor can decide together based on your project and schedule. ' +
         'Since you are already in the university system from your previous appointment, you do not need to reapply — you\'re all set on the hiring side.';
+      hiringHtml = '<p>The position pays $15/hour, and the average time commitment is about 5 hours per week, though some students work up to 10 hours. ' +
+        'This is something you and your faculty mentor can decide together based on your project and schedule. ' +
+        'Since you are already in the university system from your previous appointment, you do not need to reapply &mdash; you\'re all set on the hiring side.</p>';
     } else {
       hiringParagraph = 'The position pays $15/hour, and the average time commitment is about 5 hours per week, though some students work up to 10 hours. ' +
         'This is something you and your faculty mentor can decide together based on your project and schedule. ' +
@@ -264,6 +329,13 @@ function processPendingOnboarding() {
         'Please go to https://hr.psu.edu/careers and click on the Penn State Student box, then search by the following JOB/REQ number:\n\n' +
         'REQ_0000072675 — Architectural Engineering - Part-Time BE-Sure Research Assistant\n\n' +
         'Once you apply, please let Latrisha know so she can finish the hiring process on our end.';
+      hiringHtml = '<p>The position pays $15/hour, and the average time commitment is about 5 hours per week, though some students work up to 10 hours. ' +
+        'This is something you and your faculty mentor can decide together based on your project and schedule. ' +
+        'Please note that you must wait until you are officially in the university system before starting any work. ' +
+        'We need you to apply to the position so we can hire you on our end.</p>' +
+        '<p>Please go to <a href="https://hr.psu.edu/careers">hr.psu.edu/careers</a> and click on the <strong>Penn State Student</strong> box, then search by the following JOB/REQ number:</p>' +
+        '<p style="margin:12px 0 12px 20px;font-size:15px"><strong>REQ_0000072675</strong> &mdash; Architectural Engineering - Part-Time BE-Sure Research Assistant</p>' +
+        '<p>Once you apply, please let Latrisha know so she can finish the hiring process on our end.</p>';
     }
 
     var welcomeBody = 'Dear ' + firstName + ',\n\n' +
@@ -275,8 +347,24 @@ function processPendingOnboarding() {
       'We are looking forward to seeing the great work you will do with ' + facultyName + '! Please don\'t hesitate to reach out if you have any questions.\n\n' +
       'Best regards,\nDoc Nap';
 
+    var welcomeHtml = '<div style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.6;color:#333">' +
+      '<p>Dear ' + firstName + ',</p>' +
+      '<p>Welcome to the AE Research Scholars program! We are thrilled to have you join us!!</p>' +
+      '<p>To help you get started and stay connected, we have added you to the official <strong>AE Research Scholars channel on Microsoft Teams</strong>. ' +
+      'This channel is our primary hub for communication, where we post important information about graduate school fellowships, research scholarships, ' +
+      'professional development events, and other opportunities relevant to your academic and research career!</p>' +
+      '<p>A key component of the AE Research Scholars program is sharing your work with the broader community. To that end, all student researchers ' +
+      'participate in a poster session at the end of each year (April) to present their progress and accomplishments. We will share more details via Teams about this.</p>' +
+      hiringHtml +
+      '<p>In terms of research mentoring and meetings, your faculty mentor is your primary contact. Some students meet weekly, others monthly, and some prefer ' +
+      'quick check-ins via Teams. Have a conversation with your mentor about what works best for both of you and your project. If you run into any issues with this, ' +
+      'please reach back out to me&mdash;I\'m happy to help.</p>' +
+      '<p>We are looking forward to seeing the great work you will do with ' + facultyName + '! Please don\'t hesitate to reach out if you have any questions.</p>' +
+      '<p>Best regards,<br>Doc Nap</p>' +
+      '</div>';
+
     var welcomeCc = [ADMIN_EMAIL, piEmail, FINANCE_EMAIL].filter(Boolean).join(',');
-    GmailApp.sendEmail(studentEmail, welcomeSubject, welcomeBody, { cc: welcomeCc });
+    GmailApp.sendEmail(studentEmail, welcomeSubject, welcomeBody, { cc: welcomeCc, htmlBody: welcomeHtml });
 
     sheet.getRange(i + 1, 9).setValue(new Date().toISOString());
   }
