@@ -36,6 +36,34 @@
   margin-top: 0.3rem;
 }
 
+.tab-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 0;
+}
+.tab-btn {
+  padding: 0.6rem 1.2rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+  font-family: inherit;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active {
+  color: var(--navy);
+  border-bottom-color: var(--navy);
+}
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
 .chart-section {
   margin-bottom: 2.5rem;
 }
@@ -89,19 +117,19 @@
   text-align: right;
 }
 
-.faculty-table {
+.data-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.9rem;
   margin-top: 0.5rem;
 }
-.faculty-table th,
-.faculty-table td {
+.data-table th,
+.data-table td {
   text-align: left;
   padding: 0.5rem 0.8rem;
   border-bottom: 1px solid var(--border);
 }
-.faculty-table th {
+.data-table th {
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -110,8 +138,8 @@
   border-bottom: 2px solid var(--border);
   white-space: nowrap;
 }
-.faculty-table tr:hover td { background: var(--sand); }
-.faculty-table td.num {
+.data-table tr:hover td { background: var(--sand); }
+.data-table td.num {
   text-align: center;
   font-weight: 600;
 }
@@ -123,6 +151,16 @@
   color: var(--text-secondary);
 }
 
+.conversion {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+.conversion strong {
+  color: var(--navy);
+  font-size: 1.1rem;
+}
+
 @media (max-width: 600px) {
   .bar-row {
     grid-template-columns: 100px 1fr 36px;
@@ -131,6 +169,7 @@
   .stat-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+  .tab-btn { padding: 0.5rem 0.8rem; font-size: 0.82rem; }
 }
 </style>
 </head>
@@ -146,7 +185,7 @@
 <section class="section">
   <div class="section-inner">
     <p style="margin-bottom:0.5rem;color:var(--text-secondary);">
-      All-time applicant and placement statistics. Placements reflect students with funding recorded.
+      All-time program statistics. Placements reflect students with funding recorded.
     </p>
     <p style="margin-bottom:1.5rem;">
       <button class="btn btn-secondary" onclick="loadDashboard()" style="font-size:0.82rem;padding:0.35rem 0.8rem;">Refresh</button>
@@ -186,48 +225,100 @@ function loadDashboard() {
 
 function render(students, placements) {
   var container = document.getElementById('dashboard-content');
-  var totalApplicants = students.length;
 
-  // Unique students placed (dedupe by email)
+  // Index students by email for cross-referencing
+  var studentByEmail = {};
+  students.forEach(function (s) {
+    studentByEmail[s.email.toLowerCase()] = s;
+  });
+
+  // Build placed student list with their applicant data
   var placedEmails = {};
-  var placedFaculty = {};
+  var placedStudents = [];
   placements.forEach(function (p) {
     var email = (p['Student Email'] || '').toLowerCase();
-    if (email) placedEmails[email] = true;
-    var f = p['Faculty Name'] || '';
-    if (f) placedFaculty[f] = (placedFaculty[f] || 0) + 1;
-  });
-  var totalPlaced = Object.keys(placedEmails).length;
-  var facultyWithPlacements = Object.keys(placedFaculty).length;
-
-  // Interest counts (High only)
-  var highInterest = {};
-  OPTIONS.forEach(function (o) { highInterest[o] = 0; });
-  students.forEach(function (s) {
-    var interests = s.interests || {};
-    OPTIONS.forEach(function (o) {
-      if (interests[o] === 'High') highInterest[o]++;
+    if (!email || placedEmails[email]) return;
+    placedEmails[email] = true;
+    var applicant = studentByEmail[email] || {};
+    placedStudents.push({
+      name: p['Student Name'] || applicant.name || '',
+      email: email,
+      faculty: p['Faculty Name'] || '',
+      gradYear: applicant.gradYear || null,
+      major: applicant.major || '',
+      interests: applicant.interests || {},
+      periodType: p['Period Type'] || '',
+      fund1: p['Period 1 Fund'] || '',
+      fund2: p['Period 2 Fund'] || '',
+      label1: p['Period 1 Label'] || '',
+      label2: p['Period 2 Label'] || ''
     });
   });
 
-  // Graduation year counts
-  var gradYears = {};
-  students.forEach(function (s) {
-    if (s.gradYear) {
-      gradYears[s.gradYear] = (gradYears[s.gradYear] || 0) + 1;
-    }
+  // Faculty placement counts (including multi-placements)
+  var placedFaculty = {};
+  placements.forEach(function (p) {
+    var f = p['Faculty Name'] || '';
+    if (f) placedFaculty[f] = (placedFaculty[f] || 0) + 1;
   });
-  var sortedYears = Object.keys(gradYears).sort();
 
-  // Major counts
-  var majors = {};
+  // ── Tabs shell ──
+  var html = '';
+  html += '<div class="tab-bar">';
+  html += '<button class="tab-btn active" data-tab="applicants">Applicants</button>';
+  html += '<button class="tab-btn" data-tab="placed">Placed Students</button>';
+  html += '</div>';
+
+  // ══════════════════════════════════════════
+  //  TAB 1: APPLICANTS
+  // ══════════════════════════════════════════
+  html += '<div class="tab-panel active" id="tab-applicants">';
+
+  // Summary cards
+  var withPref = students.filter(function (s) { return s.facultyPref; }).length;
+  html += '<div class="stat-grid">';
+  html += statCard(students.length, 'Total Applicants');
+  html += statCard(placedStudents.length, 'Students Placed');
+  html += statCard(withPref, 'Named a Faculty Pref');
+  html += statCard(Object.keys(placedFaculty).length, 'Faculty with Placements');
+  html += '</div>';
+
+  // Interest by research area
+  var highInterest = {};
+  OPTIONS.forEach(function (o) { highInterest[o] = 0; });
   students.forEach(function (s) {
-    var m = s.major || 'Not specified';
-    majors[m] = (majors[m] || 0) + 1;
+    OPTIONS.forEach(function (o) {
+      if ((s.interests || {})[o] === 'High') highInterest[o]++;
+    });
   });
-  var sortedMajors = Object.keys(majors).sort(function (a, b) {
-    return majors[b] - majors[a];
-  });
+  var maxInterest = Math.max.apply(null, OPTIONS.map(function (o) { return highInterest[o]; }));
+  html += '<div class="chart-section">';
+  html += '<h3>Interest by Research Area</h3>';
+  html += '<p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:0.75rem;">Students who rated each area as &ldquo;High&rdquo; interest. One student can select multiple.</p>';
+  html += '<div class="bar-chart">';
+  OPTIONS.forEach(function (o) { html += barRow(o, highInterest[o], maxInterest || 1); });
+  html += '</div></div>';
+
+  // Graduation year
+  var gradYears = {};
+  students.forEach(function (s) { if (s.gradYear) gradYears[s.gradYear] = (gradYears[s.gradYear] || 0) + 1; });
+  var sortedYears = Object.keys(gradYears).sort();
+  if (sortedYears.length) {
+    var maxYear = Math.max.apply(null, sortedYears.map(function (y) { return gradYears[y]; }));
+    html += '<div class="chart-section"><h3>Graduation Year</h3><div class="bar-chart">';
+    sortedYears.forEach(function (y) { html += barRow(y, gradYears[y], maxYear || 1, 'accent'); });
+    html += '</div></div>';
+  }
+
+  // Major
+  var majors = {};
+  students.forEach(function (s) { var m = s.major || 'Not specified'; majors[m] = (majors[m] || 0) + 1; });
+  var sortedMajors = Object.keys(majors).sort(function (a, b) { return majors[b] - majors[a]; });
+  if (sortedMajors.length) {
+    html += '<div class="chart-section"><h3>Major</h3><div class="bar-chart">';
+    sortedMajors.forEach(function (m) { html += barRow(m, majors[m], majors[sortedMajors[0]] || 1); });
+    html += '</div></div>';
+  }
 
   // Applications by month
   var byMonth = {};
@@ -239,86 +330,147 @@ function render(students, placements) {
     }
   });
   var sortedMonths = Object.keys(byMonth).sort();
-
-  // Faculty preferences
-  var withPref = students.filter(function (s) { return s.facultyPref; }).length;
-
-  // Build HTML
-  var html = '';
-
-  // Summary cards
-  html += '<div class="stat-grid">';
-  html += statCard(totalApplicants, 'Total Applicants');
-  html += statCard(totalPlaced, 'Students Placed');
-  html += statCard(facultyWithPlacements, 'Faculty with Placements');
-  html += statCard(withPref, 'Named a Faculty Pref');
-  html += '</div>';
-
-  // Interest by research area
-  html += '<div class="chart-section">';
-  html += '<h3>Interest by Research Area</h3>';
-  html += '<p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:0.75rem;">Students who rated each area as &ldquo;High&rdquo; interest. One student can select multiple areas.</p>';
-  var maxInterest = Math.max.apply(null, OPTIONS.map(function (o) { return highInterest[o]; }));
-  html += '<div class="bar-chart">';
-  OPTIONS.forEach(function (o) {
-    html += barRow(o, highInterest[o], maxInterest || 1);
-  });
-  html += '</div></div>';
-
-  // Graduation year
-  if (sortedYears.length) {
-    html += '<div class="chart-section">';
-    html += '<h3>Graduation Year</h3>';
-    var maxYear = Math.max.apply(null, sortedYears.map(function (y) { return gradYears[y]; }));
-    html += '<div class="bar-chart">';
-    sortedYears.forEach(function (y) {
-      html += barRow(y, gradYears[y], maxYear || 1, 'accent');
-    });
-    html += '</div></div>';
-  }
-
-  // Major
-  if (sortedMajors.length) {
-    html += '<div class="chart-section">';
-    html += '<h3>Major</h3>';
-    var maxMajor = majors[sortedMajors[0]] || 1;
-    html += '<div class="bar-chart">';
-    sortedMajors.forEach(function (m) {
-      html += barRow(m, majors[m], maxMajor);
-    });
-    html += '</div></div>';
-  }
-
-  // Applications over time
   if (sortedMonths.length) {
-    html += '<div class="chart-section">';
-    html += '<h3>Applications by Month</h3>';
     var maxMonth = Math.max.apply(null, sortedMonths.map(function (m) { return byMonth[m]; }));
-    html += '<div class="bar-chart">';
+    html += '<div class="chart-section"><h3>Applications by Month</h3><div class="bar-chart">';
     sortedMonths.forEach(function (m) {
       var parts = m.split('-');
-      var label = monthName(parseInt(parts[1])) + ' ' + parts[0];
-      html += barRow(label, byMonth[m], maxMonth || 1, 'accent');
+      html += barRow(monthName(parseInt(parts[1])) + ' ' + parts[0], byMonth[m], maxMonth || 1, 'accent');
     });
     html += '</div></div>';
   }
 
-  // Faculty placements table
-  if (Object.keys(placedFaculty).length) {
-    html += '<div class="chart-section">';
-    html += '<h3>Placements by Faculty</h3>';
-    html += '<div class="table-wrap"><table class="faculty-table">';
-    html += '<thead><tr><th>Faculty</th><th style="text-align:center;">Students</th></tr></thead><tbody>';
-    var sortedFaculty = Object.keys(placedFaculty).sort(function (a, b) {
-      return placedFaculty[b] - placedFaculty[a];
+  html += '</div>'; // end tab-applicants
+
+  // ══════════════════════════════════════════
+  //  TAB 2: PLACED STUDENTS
+  // ══════════════════════════════════════════
+  html += '<div class="tab-panel" id="tab-placed">';
+
+  if (!placedStudents.length) {
+    html += '<p class="loading-msg">No placements recorded yet.</p>';
+  } else {
+    // Summary cards
+    var deptMatchCount = 0;
+    var piFundedBoth = 0;
+    placements.forEach(function (p) {
+      var f1 = (p['Period 1 Fund'] || '').toLowerCase();
+      var f2 = (p['Period 2 Fund'] || '').toLowerCase();
+      if (f1.indexOf('dept') !== -1 || f2.indexOf('dept') !== -1) deptMatchCount++;
+      else if (f1 && f2) piFundedBoth++;
     });
-    sortedFaculty.forEach(function (f) {
-      html += '<tr><td>' + escapeHtml(f) + '</td><td class="num">' + placedFaculty[f] + '</td></tr>';
+
+    html += '<div class="stat-grid">';
+    html += statCard(placedStudents.length, 'Students Placed');
+    html += statCard(placements.length, 'Total Placements');
+    html += statCard(Object.keys(placedFaculty).length, 'Faculty Mentors');
+    html += statCard(deptMatchCount, 'Dept Match');
+    html += '</div>';
+
+    // Conversion rate
+    if (students.length) {
+      var pct = (placedStudents.length / students.length * 100).toFixed(0);
+      html += '<p class="conversion"><strong>' + pct + '%</strong> placement rate (' + placedStudents.length + ' of ' + students.length + ' applicants)</p>';
+    }
+
+    // Placements by faculty
+    html += '<div class="chart-section"><h3>Placements by Faculty</h3>';
+    var sortedFaculty = Object.keys(placedFaculty).sort(function (a, b) { return placedFaculty[b] - placedFaculty[a]; });
+    var maxFac = placedFaculty[sortedFaculty[0]] || 1;
+    html += '<div class="bar-chart">';
+    sortedFaculty.forEach(function (f) { html += barRow(f, placedFaculty[f], maxFac, 'success'); });
+    html += '</div></div>';
+
+    // Placed students' interests
+    var placedHighInterest = {};
+    OPTIONS.forEach(function (o) { placedHighInterest[o] = 0; });
+    placedStudents.forEach(function (s) {
+      OPTIONS.forEach(function (o) {
+        if ((s.interests || {})[o] === 'High') placedHighInterest[o]++;
+      });
+    });
+    var maxPInterest = Math.max.apply(null, OPTIONS.map(function (o) { return placedHighInterest[o]; }));
+    html += '<div class="chart-section"><h3>Placed Students by Research Area</h3>';
+    html += '<p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:0.75rem;">Research areas placed students rated as &ldquo;High&rdquo; interest when they applied.</p>';
+    html += '<div class="bar-chart">';
+    OPTIONS.forEach(function (o) { html += barRow(o, placedHighInterest[o], maxPInterest || 1); });
+    html += '</div></div>';
+
+    // Placed students' graduation year
+    var pGradYears = {};
+    placedStudents.forEach(function (s) { if (s.gradYear) pGradYears[s.gradYear] = (pGradYears[s.gradYear] || 0) + 1; });
+    var pSortedYears = Object.keys(pGradYears).sort();
+    if (pSortedYears.length) {
+      var pMaxYear = Math.max.apply(null, pSortedYears.map(function (y) { return pGradYears[y]; }));
+      html += '<div class="chart-section"><h3>Placed Students by Graduation Year</h3><div class="bar-chart">';
+      pSortedYears.forEach(function (y) { html += barRow(y, pGradYears[y], pMaxYear || 1, 'accent'); });
+      html += '</div></div>';
+    }
+
+    // Placed students' major
+    var pMajors = {};
+    placedStudents.forEach(function (s) { var m = s.major || 'Not specified'; pMajors[m] = (pMajors[m] || 0) + 1; });
+    var pSortedMajors = Object.keys(pMajors).sort(function (a, b) { return pMajors[b] - pMajors[a]; });
+    if (pSortedMajors.length) {
+      html += '<div class="chart-section"><h3>Placed Students by Major</h3><div class="bar-chart">';
+      pSortedMajors.forEach(function (m) { html += barRow(m, pMajors[m], pMajors[pSortedMajors[0]] || 1); });
+      html += '</div></div>';
+    }
+
+    // Funding breakdown
+    var fundingTypes = { 'Dept match': 0, 'PI funded': 0, 'Mixed / other': 0 };
+    placements.forEach(function (p) {
+      var f1 = (p['Period 1 Fund'] || '').toLowerCase();
+      var f2 = (p['Period 2 Fund'] || '').toLowerCase();
+      var hasDept = f1.indexOf('dept') !== -1 || f1.indexOf('besure') !== -1 || f2.indexOf('dept') !== -1 || f2.indexOf('besure') !== -1;
+      var hasPI = (f1 && f1.indexOf('dept') === -1 && f1.indexOf('besure') === -1) || (f2 && f2.indexOf('dept') === -1 && f2.indexOf('besure') === -1);
+      if (hasDept && hasPI) fundingTypes['Mixed / other']++;
+      else if (hasDept) fundingTypes['Dept match']++;
+      else if (hasPI) fundingTypes['PI funded']++;
+      else fundingTypes['Mixed / other']++;
+    });
+    var maxFund = Math.max(fundingTypes['Dept match'], fundingTypes['PI funded'], fundingTypes['Mixed / other']);
+    html += '<div class="chart-section"><h3>Funding Source</h3>';
+    html += '<p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:0.75rem;">&ldquo;Mixed&rdquo; means one semester is department-matched and the other is PI-funded (the typical arrangement).</p>';
+    html += '<div class="bar-chart">';
+    ['Mixed / other', 'Dept match', 'PI funded'].forEach(function (k) {
+      if (fundingTypes[k]) html += barRow(k, fundingTypes[k], maxFund || 1, k === 'Dept match' ? 'accent' : k === 'PI funded' ? 'success' : '');
+    });
+    html += '</div></div>';
+
+    // Full roster table
+    html += '<div class="chart-section"><h3>All Placed Students</h3>';
+    html += '<div class="table-wrap"><table class="data-table">';
+    html += '<thead><tr><th>Student</th><th>Faculty</th><th>Year</th><th>Major</th><th>Funding</th></tr></thead><tbody>';
+    placedStudents.sort(function (a, b) { return a.name.localeCompare(b.name); });
+    placedStudents.forEach(function (s) {
+      var fundDesc = '';
+      if (s.fund1 && s.fund2) fundDesc = escapeHtml(s.label1 + ': ' + s.fund1 + ', ' + s.label2 + ': ' + s.fund2);
+      else if (s.fund1) fundDesc = escapeHtml(s.label1 + ': ' + s.fund1);
+      else fundDesc = '<span style="color:var(--text-secondary);">TBD</span>';
+      html += '<tr>' +
+        '<td>' + escapeHtml(s.name) + '</td>' +
+        '<td>' + escapeHtml(s.faculty) + '</td>' +
+        '<td class="num">' + (s.gradYear || '—') + '</td>' +
+        '<td>' + escapeHtml(s.major || '—') + '</td>' +
+        '<td style="font-size:0.82rem;">' + fundDesc + '</td></tr>';
     });
     html += '</tbody></table></div></div>';
   }
 
+  html += '</div>'; // end tab-placed
+
   container.innerHTML = html;
+
+  // Wire up tab clicks
+  container.querySelectorAll('.tab-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      container.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
+      container.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.remove('active'); });
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+  });
 }
 
 function statCard(num, label) {
