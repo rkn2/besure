@@ -259,10 +259,10 @@ function render(students, placements) {
       major: applicant.major || '',
       interests: applicant.interests || {},
       periodType: p['Period Type'] || '',
-      fund1: p['Period 1 Fund'] || '',
-      fund2: p['Period 2 Fund'] || '',
-      label1: p['Period 1 Label'] || '',
-      label2: p['Period 2 Label'] || ''
+      fund1: String(p['Period 1 Fund'] || ''),
+      fund2: String(p['Period 2 Fund'] || ''),
+      label1: String(p['Period 1 Label'] || ''),
+      label2: String(p['Period 2 Label'] || '')
     });
   });
 
@@ -365,8 +365,8 @@ function render(students, placements) {
     var deptMatchCount = 0;
     var piFundedBoth = 0;
     placements.forEach(function (p) {
-      var f1 = (p['Period 1 Fund'] || '').toLowerCase();
-      var f2 = (p['Period 2 Fund'] || '').toLowerCase();
+      var f1 = String(p['Period 1 Fund'] || '').toLowerCase();
+      var f2 = String(p['Period 2 Fund'] || '').toLowerCase();
       if (f1.indexOf('dept') !== -1 || f2.indexOf('dept') !== -1) deptMatchCount++;
       else if (f1 && f2) piFundedBoth++;
     });
@@ -431,8 +431,8 @@ function render(students, placements) {
     // Funding breakdown
     var fundingTypes = { 'Dept match': 0, 'PI funded': 0, 'Mixed / other': 0 };
     placements.forEach(function (p) {
-      var f1 = (p['Period 1 Fund'] || '').toLowerCase();
-      var f2 = (p['Period 2 Fund'] || '').toLowerCase();
+      var f1 = String(p['Period 1 Fund'] || '').toLowerCase();
+      var f2 = String(p['Period 2 Fund'] || '').toLowerCase();
       var hasDept = f1.indexOf('dept') !== -1 || f1.indexOf('besure') !== -1 || f2.indexOf('dept') !== -1 || f2.indexOf('besure') !== -1;
       var hasPI = (f1 && f1.indexOf('dept') === -1 && f1.indexOf('besure') === -1) || (f2 && f2.indexOf('dept') === -1 && f2.indexOf('besure') === -1);
       if (hasDept && hasPI) fundingTypes['Mixed / other']++;
