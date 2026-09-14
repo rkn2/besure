@@ -206,20 +206,31 @@ var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxl3x4KWmjHufkroWiXieW
 var API_KEY = 'U50J4N2YOVeJ1-LaOvlrt9hkQMNJEqet';
 var OPTIONS = ['Structures', 'Mechanical / Energy', 'Lighting / Electrical', 'Construction'];
 
+function fetchJSON(action) {
+  return fetch(SCRIPT_URL + '?key=' + encodeURIComponent(API_KEY) + '&action=' + action)
+    .then(function (r) {
+      if (!r.ok) throw new Error(action + ': HTTP ' + r.status);
+      return r.text();
+    })
+    .then(function (text) {
+      try { return JSON.parse(text); }
+      catch (e) { throw new Error(action + ': invalid JSON — ' + text.substring(0, 120)); }
+    });
+}
+
 function loadDashboard() {
   var container = document.getElementById('dashboard-content');
   container.innerHTML = '<p class="loading-msg">Loading data...</p>';
 
-  Promise.all([
-    fetch(SCRIPT_URL + '?key=' + encodeURIComponent(API_KEY) + '&action=students').then(function (r) { return r.json(); }),
-    fetch(SCRIPT_URL + '?key=' + encodeURIComponent(API_KEY) + '&action=placements').then(function (r) { return r.json(); })
-  ])
-    .then(function (results) {
-      render(results[0], results[1]);
+  fetchJSON('students')
+    .then(function (students) {
+      return fetchJSON('placements').then(function (placements) {
+        render(students, placements);
+      });
     })
     .catch(function (err) {
       console.error(err);
-      container.innerHTML = '<p class="loading-msg" style="color:var(--error);">Could not load data. Check that the Apps Script is deployed.</p>';
+      container.innerHTML = '<p class="loading-msg" style="color:var(--error);">' + escapeHtml(String(err)) + '</p>';
     });
 }
 
