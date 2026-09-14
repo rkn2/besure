@@ -117,34 +117,6 @@
   text-align: right;
 }
 
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-  margin-top: 0.5rem;
-}
-.data-table th,
-.data-table td {
-  text-align: left;
-  padding: 0.5rem 0.8rem;
-  border-bottom: 1px solid var(--border);
-}
-.data-table th {
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-secondary);
-  font-weight: 600;
-  border-bottom: 2px solid var(--border);
-  white-space: nowrap;
-}
-.data-table tr:hover td { background: var(--sand); }
-.data-table td.num {
-  text-align: center;
-  font-weight: 600;
-}
-.table-wrap { overflow-x: auto; }
-
 .loading-msg {
   text-align: center;
   padding: 3rem 1rem;
@@ -254,23 +226,10 @@ function render(students, placements) {
     placedStudents.push({
       name: p['Student Name'] || applicant.name || '',
       email: email,
-      faculty: p['Faculty Name'] || '',
       gradYear: applicant.gradYear || null,
       major: applicant.major || '',
-      interests: applicant.interests || {},
-      periodType: p['Period Type'] || '',
-      fund1: String(p['Period 1 Fund'] || ''),
-      fund2: String(p['Period 2 Fund'] || ''),
-      label1: String(p['Period 1 Label'] || ''),
-      label2: String(p['Period 2 Label'] || '')
+      interests: applicant.interests || {}
     });
-  });
-
-  // Faculty placement counts (including multi-placements)
-  var placedFaculty = {};
-  placements.forEach(function (p) {
-    var f = p['Faculty Name'] || '';
-    if (f) placedFaculty[f] = (placedFaculty[f] || 0) + 1;
   });
 
   // ── Tabs shell ──
@@ -291,7 +250,6 @@ function render(students, placements) {
   html += statCard(students.length, 'Total Applicants');
   html += statCard(placedStudents.length, 'Students Placed');
   html += statCard(withPref, 'Named a Faculty Pref');
-  html += statCard(Object.keys(placedFaculty).length, 'Faculty with Placements');
   html += '</div>';
 
   // Interest by research area
@@ -361,21 +319,9 @@ function render(students, placements) {
   if (!placedStudents.length) {
     html += '<p class="loading-msg">No placements recorded yet.</p>';
   } else {
-    // Summary cards
-    var deptMatchCount = 0;
-    var piFundedBoth = 0;
-    placements.forEach(function (p) {
-      var f1 = String(p['Period 1 Fund'] || '').toLowerCase();
-      var f2 = String(p['Period 2 Fund'] || '').toLowerCase();
-      if (f1.indexOf('dept') !== -1 || f2.indexOf('dept') !== -1) deptMatchCount++;
-      else if (f1 && f2) piFundedBoth++;
-    });
-
     html += '<div class="stat-grid">';
     html += statCard(placedStudents.length, 'Students Placed');
     html += statCard(placements.length, 'Total Placements');
-    html += statCard(Object.keys(placedFaculty).length, 'Faculty Mentors');
-    html += statCard(deptMatchCount, 'Dept Match');
     html += '</div>';
 
     // Conversion rate
@@ -383,14 +329,6 @@ function render(students, placements) {
       var pct = (placedStudents.length / students.length * 100).toFixed(0);
       html += '<p class="conversion"><strong>' + pct + '%</strong> placement rate (' + placedStudents.length + ' of ' + students.length + ' applicants)</p>';
     }
-
-    // Placements by faculty
-    html += '<div class="chart-section"><h3>Placements by Faculty</h3>';
-    var sortedFaculty = Object.keys(placedFaculty).sort(function (a, b) { return placedFaculty[b] - placedFaculty[a]; });
-    var maxFac = placedFaculty[sortedFaculty[0]] || 1;
-    html += '<div class="bar-chart">';
-    sortedFaculty.forEach(function (f) { html += barRow(f, placedFaculty[f], maxFac, 'success'); });
-    html += '</div></div>';
 
     // Placed students' interests
     var placedHighInterest = {};
@@ -428,45 +366,6 @@ function render(students, placements) {
       html += '</div></div>';
     }
 
-    // Funding breakdown
-    var fundingTypes = { 'Dept match': 0, 'PI funded': 0, 'Mixed / other': 0 };
-    placements.forEach(function (p) {
-      var f1 = String(p['Period 1 Fund'] || '').toLowerCase();
-      var f2 = String(p['Period 2 Fund'] || '').toLowerCase();
-      var hasDept = f1.indexOf('dept') !== -1 || f1.indexOf('besure') !== -1 || f2.indexOf('dept') !== -1 || f2.indexOf('besure') !== -1;
-      var hasPI = (f1 && f1.indexOf('dept') === -1 && f1.indexOf('besure') === -1) || (f2 && f2.indexOf('dept') === -1 && f2.indexOf('besure') === -1);
-      if (hasDept && hasPI) fundingTypes['Mixed / other']++;
-      else if (hasDept) fundingTypes['Dept match']++;
-      else if (hasPI) fundingTypes['PI funded']++;
-      else fundingTypes['Mixed / other']++;
-    });
-    var maxFund = Math.max(fundingTypes['Dept match'], fundingTypes['PI funded'], fundingTypes['Mixed / other']);
-    html += '<div class="chart-section"><h3>Funding Source</h3>';
-    html += '<p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:0.75rem;">&ldquo;Mixed&rdquo; means one semester is department-matched and the other is PI-funded (the typical arrangement).</p>';
-    html += '<div class="bar-chart">';
-    ['Mixed / other', 'Dept match', 'PI funded'].forEach(function (k) {
-      if (fundingTypes[k]) html += barRow(k, fundingTypes[k], maxFund || 1, k === 'Dept match' ? 'accent' : k === 'PI funded' ? 'success' : '');
-    });
-    html += '</div></div>';
-
-    // Full roster table
-    html += '<div class="chart-section"><h3>All Placed Students</h3>';
-    html += '<div class="table-wrap"><table class="data-table">';
-    html += '<thead><tr><th>Student</th><th>Faculty</th><th>Year</th><th>Major</th><th>Funding</th></tr></thead><tbody>';
-    placedStudents.sort(function (a, b) { return a.name.localeCompare(b.name); });
-    placedStudents.forEach(function (s) {
-      var fundDesc = '';
-      if (s.fund1 && s.fund2) fundDesc = escapeHtml(s.label1 + ': ' + s.fund1 + ', ' + s.label2 + ': ' + s.fund2);
-      else if (s.fund1) fundDesc = escapeHtml(s.label1 + ': ' + s.fund1);
-      else fundDesc = '<span style="color:var(--text-secondary);">TBD</span>';
-      html += '<tr>' +
-        '<td>' + escapeHtml(s.name) + '</td>' +
-        '<td>' + escapeHtml(s.faculty) + '</td>' +
-        '<td class="num">' + (s.gradYear || '—') + '</td>' +
-        '<td>' + escapeHtml(s.major || '—') + '</td>' +
-        '<td style="font-size:0.82rem;">' + fundDesc + '</td></tr>';
-    });
-    html += '</tbody></table></div></div>';
   }
 
   html += '</div>'; // end tab-placed
