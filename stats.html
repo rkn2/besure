@@ -324,6 +324,10 @@ function render(students, placements) {
     html += statCard(placements.length, 'Total Placements');
     html += '</div>';
 
+    html += '<p style="margin-bottom:1.5rem;">';
+    html += '<button class="btn btn-secondary" id="download-placed-csv" style="font-size:0.82rem;padding:0.35rem 0.8rem;">Download Names &amp; Emails (CSV)</button>';
+    html += '</p>';
+
     // Conversion rate
     if (students.length) {
       var pct = (placedStudents.length / students.length * 100).toFixed(0);
@@ -381,6 +385,26 @@ function render(students, placements) {
       document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
     });
   });
+
+  var csvBtn = document.getElementById('download-placed-csv');
+  if (csvBtn) {
+    csvBtn.addEventListener('click', function () {
+      var rows = [['Name', 'Email']];
+      placedStudents.forEach(function (s) {
+        rows.push([csvCell(s.name), csvCell(s.email)]);
+      });
+      var csv = rows.map(function (r) { return r.join(','); }).join('\r\n');
+      var blob = new Blob([csv], { type: 'text/csv' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'placed-students.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  }
 }
 
 function statCard(num, label) {
@@ -400,6 +424,14 @@ function barRow(label, value, max, variant) {
 
 function monthName(n) {
   return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][n - 1] || '';
+}
+
+function csvCell(val) {
+  var s = String(val || '');
+  if (s.indexOf(',') !== -1 || s.indexOf('"') !== -1 || s.indexOf('\n') !== -1) {
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  return s;
 }
 
 function escapeHtml(str) {
