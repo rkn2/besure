@@ -1,0 +1,172 @@
+<title>Teams Welcome Note</title>
+<style>
+  :root {
+    --bg: #fafaf8;
+    --surface: #ffffff;
+    --text: #1a1a1a;
+    --text-secondary: #5a5a55;
+    --accent: #0a2240;
+    --accent-light: #e8edf3;
+    --border: #e2e0dc;
+    --gold: #b8860b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #161615;
+      --surface: #1e1e1c;
+      --text: #e8e8e4;
+      --text-secondary: #9a9a94;
+      --accent: #83acd5;
+      --accent-light: #1c2a3a;
+      --border: #2e2e2b;
+      --gold: #d4a84b;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #161615;
+    --surface: #1e1e1c;
+    --text: #e8e8e4;
+    --text-secondary: #9a9a94;
+    --accent: #83acd5;
+    --accent-light: #1c2a3a;
+    --border: #2e2e2b;
+    --gold: #d4a84b;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    max-width: 640px;
+    margin: 0 auto;
+    padding-inline: 20px;
+  }
+
+  .note {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 2rem 1.75rem;
+    margin-block: 1.5rem;
+  }
+
+  h1 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin: 0 0 1.25rem 0;
+    line-height: 1.35;
+  }
+
+  p {
+    margin: 0 0 1rem 0;
+  }
+
+  .section-head {
+    font-weight: 600;
+    color: var(--accent);
+    font-size: 0.88rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 1.5rem 0 0.5rem 0;
+  }
+
+  .section-head:first-of-type {
+    margin-top: 1.25rem;
+  }
+
+  ul {
+    margin: 0.25rem 0 1rem 0;
+    padding-left: 1.25rem;
+  }
+
+  li {
+    margin-bottom: 0.3rem;
+  }
+
+  .sign-off {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 0.92rem;
+  }
+
+  .copy-bar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 0.5rem;
+  }
+
+  .copy-btn {
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--accent);
+    background: var(--accent-light);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.4rem 0.9rem;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .copy-btn:hover { opacity: 0.8; }
+  .copy-btn:active { opacity: 0.6; }
+
+  .hint {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    margin-top: 0.75rem;
+  }
+</style>
+
+<div class="copy-bar">
+  <button class="copy-btn" id="copyBtn">Copy to clipboard</button>
+</div>
+
+<div class="note" id="note">
+  <!-- Update the semester/year each term -->
+  <h1>Welcome to AE Research Scholars, Fall 2026!</h1>
+
+  <p>Congratulations on being placed with a faculty mentor this semester! You're joining a community of undergraduate researchers across Architectural Engineering.</p>
+
+  <p class="section-head">Before you start</p>
+  <p>Please make sure you are officially hired in Workday and have completed your background check before you begin logging hours. If you run into any issues with the hiring process, reach out to Latrisha and she can direct you to the right people.</p>
+
+  <p class="section-head">What you'll be doing</p>
+  <p>You'll work directly with your faculty mentor on their active research. You and your mentor will set a schedule that works for both of you. Use this semester to dig into the work, ask questions, and start building expertise in your area.</p>
+
+  <p class="section-head">Poster session in the spring</p>
+  <p>All AE Research Scholars present their work at our poster session in April. This is a great opportunity to practice communicating your research and to see what everyone else has been working on. We'll share more details as it gets closer, but keep it on your radar&mdash;you'll want to start thinking about your poster as your work progresses.</p>
+
+  <p class="section-head">Your point of contact</p>
+  <p>I'm Dr. Napolitano (Doc Nap)&mdash;reach out to me at rjn5308@psu.edu or right here in this channel with any questions about the program.</p>
+
+  <p class="section-head">I can also help you with</p>
+  <ul>
+    <li>Scholarship and fellowship applications</li>
+    <li>Writing about your research experience on your resume</li>
+    <li>Anything else that comes up&mdash;don't hesitate to ask</li>
+  </ul>
+
+  <p>Looking forward to a great semester. Welcome aboard!</p>
+
+  <div class="sign-off">— Doc Nap</div>
+</div>
+
+<p class="hint">The copy button grabs the text without formatting for pasting into Teams.</p>
+
+<script>
+document.getElementById('copyBtn').addEventListener('click', function () {
+  var note = document.getElementById('note');
+  var text = note.innerText.replace(/\n{3,}/g, '\n\n').trim();
+  navigator.clipboard.writeText(text).then(function () {
+    var btn = document.getElementById('copyBtn');
+    btn.textContent = 'Copied!';
+    setTimeout(function () { btn.textContent = 'Copy to clipboard'; }, 2000);
+  });
+});
+</script>
