@@ -133,6 +133,38 @@
   font-size: 1.1rem;
 }
 
+.placements-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+}
+.placements-table th,
+.placements-table td {
+  text-align: left;
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+}
+.placements-table th {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  font-weight: 600;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.placements-table tr:hover td {
+  background: var(--sand);
+}
+.placements-table td.fund {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.85rem;
+}
+.table-wrap {
+  overflow-x: auto;
+}
+
 @media (max-width: 600px) {
   .bar-row {
     grid-template-columns: 100px 1fr 36px;
@@ -237,6 +269,7 @@ function render(students, placements) {
   html += '<div class="tab-bar">';
   html += '<button class="tab-btn active" data-tab="applicants">Applicants</button>';
   html += '<button class="tab-btn" data-tab="placed">Placed Students</button>';
+  html += '<button class="tab-btn" data-tab="roster">Student Roster</button>';
   html += '</div>';
 
   // ══════════════════════════════════════════
@@ -374,6 +407,57 @@ function render(students, placements) {
 
   html += '</div>'; // end tab-placed
 
+  // ══════════════════════════════════════════
+  //  TAB 3: STUDENT ROSTER
+  // ══════════════════════════════════════════
+  html += '<div class="tab-panel" id="tab-roster">';
+
+  var rosterRows = [];
+  placements.forEach(function (p) {
+    var email = (p['Student Email'] || '').toLowerCase();
+    if (!email) return;
+    var applicant = studentByEmail[email] || {};
+    rosterRows.push({
+      name: p['Student Name'] || applicant.name || '',
+      gradYear: applicant.gradYear || '',
+      email: email,
+      period1Label: p['Period 1 Label'] || '',
+      period1Fund: typeof p['Period 1 Fund'] === 'number' ? String(p['Period 1 Fund']) : (p['Period 1 Fund'] || ''),
+      period2Label: p['Period 2 Label'] || '',
+      period2Fund: typeof p['Period 2 Fund'] === 'number' ? String(p['Period 2 Fund']) : (p['Period 2 Fund'] || '')
+    });
+  });
+
+  if (!rosterRows.length) {
+    html += '<p class="loading-msg">No placements with funding recorded yet.</p>';
+  } else {
+    html += '<div class="stat-grid">';
+    html += statCard(rosterRows.length, 'Placement Records');
+    html += '</div>';
+
+    html += '<p style="margin-bottom:1.5rem;">';
+    html += '<button class="btn btn-secondary" id="download-roster-csv" style="font-size:0.82rem;padding:0.35rem 0.8rem;">Download Roster (CSV)</button>';
+    html += '</p>';
+
+    html += '<div class="table-wrap"><table class="placements-table">';
+    html += '<thead><tr><th>Name</th><th>Year</th><th>Email</th><th>Semester</th><th>Fund / IO</th><th>Semester</th><th>Fund / IO</th></tr></thead>';
+    html += '<tbody>';
+    rosterRows.forEach(function (r) {
+      html += '<tr>';
+      html += '<td>' + escapeHtml(r.name) + '</td>';
+      html += '<td>' + escapeHtml(String(r.gradYear)) + '</td>';
+      html += '<td>' + escapeHtml(r.email) + '</td>';
+      html += '<td>' + escapeHtml(r.period1Label) + '</td>';
+      html += '<td class="fund">' + (r.period1Fund ? escapeHtml(r.period1Fund) : '<span style="color:var(--text-secondary);">—</span>') + '</td>';
+      html += '<td>' + escapeHtml(r.period2Label) + '</td>';
+      html += '<td class="fund">' + (r.period2Fund ? escapeHtml(r.period2Fund) : '<span style="color:var(--text-secondary);">—</span>') + '</td>';
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+  }
+
+  html += '</div>'; // end tab-roster
+
   container.innerHTML = html;
 
   // Wire up tab clicks
@@ -385,6 +469,34 @@ function render(students, placements) {
       document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
     });
   });
+
+  var rosterCsvBtn = document.getElementById('download-roster-csv');
+  if (rosterCsvBtn) {
+    rosterCsvBtn.addEventListener('click', function () {
+      var rows = [['Name', 'Year', 'Email', 'Semester 1', 'Fund 1', 'Semester 2', 'Fund 2']];
+      rosterRows.forEach(function (r) {
+        rows.push([
+          csvCell(r.name),
+          csvCell(r.gradYear),
+          csvCell(r.email),
+          csvCell(r.period1Label),
+          csvCell(r.period1Fund),
+          csvCell(r.period2Label),
+          csvCell(r.period2Fund)
+        ]);
+      });
+      var csv = rows.map(function (r) { return r.join(','); }).join('\r\n');
+      var blob = new Blob([csv], { type: 'text/csv' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'student-roster.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  }
 
   var csvBtn = document.getElementById('download-placed-csv');
   if (csvBtn) {
