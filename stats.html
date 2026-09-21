@@ -421,6 +421,7 @@ function render(students, placements) {
       name: p['Student Name'] || applicant.name || '',
       gradYear: applicant.gradYear || '',
       email: email,
+      faculty: p['Faculty Name'] || '',
       period1Label: p['Period 1 Label'] || '',
       period1Fund: typeof p['Period 1 Fund'] === 'number' ? String(p['Period 1 Fund']) : (p['Period 1 Fund'] || ''),
       period2Label: p['Period 2 Label'] || '',
@@ -428,33 +429,26 @@ function render(students, placements) {
     });
   });
 
-  if (!rosterRows.length) {
-    html += '<p class="loading-msg">No placements with funding recorded yet.</p>';
-  } else {
-    html += '<div class="stat-grid">';
-    html += statCard(rosterRows.length, 'Placement Records');
-    html += '</div>';
+  var facultyNames = [];
+  var seen = {};
+  rosterRows.forEach(function (r) {
+    if (r.faculty && !seen[r.faculty]) {
+      seen[r.faculty] = true;
+      facultyNames.push(r.faculty);
+    }
+  });
+  facultyNames.sort();
 
-    html += '<p style="margin-bottom:1.5rem;">';
-    html += '<button class="btn btn-secondary" id="download-roster-csv" style="font-size:0.82rem;padding:0.35rem 0.8rem;">Download Roster (CSV)</button>';
-    html += '</p>';
+  html += '<div style="margin-bottom:1.5rem;">';
+  html += '<label for="pi-select" style="font-size:0.88rem;font-weight:500;margin-right:0.5rem;">Select your name:</label>';
+  html += '<select id="pi-select" style="font-size:0.88rem;padding:0.4rem 0.6rem;border:1px solid var(--border);border-radius:4px;background:var(--card-bg);color:var(--text);">';
+  html += '<option value="">— Choose —</option>';
+  facultyNames.forEach(function (f) {
+    html += '<option value="' + escapeHtml(f) + '">' + escapeHtml(f) + '</option>';
+  });
+  html += '</select></div>';
 
-    html += '<div class="table-wrap"><table class="placements-table">';
-    html += '<thead><tr><th>Name</th><th>Year</th><th>Email</th><th>Semester</th><th>Fund / IO</th><th>Semester</th><th>Fund / IO</th></tr></thead>';
-    html += '<tbody>';
-    rosterRows.forEach(function (r) {
-      html += '<tr>';
-      html += '<td>' + escapeHtml(r.name) + '</td>';
-      html += '<td>' + escapeHtml(String(r.gradYear)) + '</td>';
-      html += '<td>' + escapeHtml(r.email) + '</td>';
-      html += '<td>' + escapeHtml(r.period1Label) + '</td>';
-      html += '<td class="fund">' + (r.period1Fund ? escapeHtml(r.period1Fund) : '<span style="color:var(--text-secondary);">—</span>') + '</td>';
-      html += '<td>' + escapeHtml(r.period2Label) + '</td>';
-      html += '<td class="fund">' + (r.period2Fund ? escapeHtml(r.period2Fund) : '<span style="color:var(--text-secondary);">—</span>') + '</td>';
-      html += '</tr>';
-    });
-    html += '</tbody></table></div>';
-  }
+  html += '<div id="roster-results"></div>';
 
   html += '</div>'; // end tab-roster
 
@@ -470,31 +464,67 @@ function render(students, placements) {
     });
   });
 
-  var rosterCsvBtn = document.getElementById('download-roster-csv');
-  if (rosterCsvBtn) {
-    rosterCsvBtn.addEventListener('click', function () {
-      var rows = [['Name', 'Year', 'Email', 'Semester 1', 'Fund 1', 'Semester 2', 'Fund 2']];
-      rosterRows.forEach(function (r) {
-        rows.push([
-          csvCell(r.name),
-          csvCell(r.gradYear),
-          csvCell(r.email),
-          csvCell(r.period1Label),
-          csvCell(r.period1Fund),
-          csvCell(r.period2Label),
-          csvCell(r.period2Fund)
-        ]);
+  var piSelect = document.getElementById('pi-select');
+  if (piSelect) {
+    piSelect.addEventListener('change', function () {
+      var selected = piSelect.value;
+      var resultsDiv = document.getElementById('roster-results');
+      if (!selected) {
+        resultsDiv.innerHTML = '';
+        return;
+      }
+      var filtered = rosterRows.filter(function (r) { return r.faculty === selected; });
+      if (!filtered.length) {
+        resultsDiv.innerHTML = '<p class="loading-msg">No placements found.</p>';
+        return;
+      }
+      var rhtml = '<div class="stat-grid">';
+      rhtml += statCard(filtered.length, 'Your Students');
+      rhtml += '</div>';
+      rhtml += '<p style="margin-bottom:1.5rem;">';
+      rhtml += '<button class="btn btn-secondary" id="download-roster-csv" style="font-size:0.82rem;padding:0.35rem 0.8rem;">Download Roster (CSV)</button>';
+      rhtml += '</p>';
+      rhtml += '<div class="table-wrap"><table class="placements-table">';
+      rhtml += '<thead><tr><th>Name</th><th>Year</th><th>Email</th><th>Semester</th><th>Fund / IO</th><th>Semester</th><th>Fund / IO</th></tr></thead>';
+      rhtml += '<tbody>';
+      filtered.forEach(function (r) {
+        rhtml += '<tr>';
+        rhtml += '<td>' + escapeHtml(r.name) + '</td>';
+        rhtml += '<td>' + escapeHtml(String(r.gradYear)) + '</td>';
+        rhtml += '<td>' + escapeHtml(r.email) + '</td>';
+        rhtml += '<td>' + escapeHtml(r.period1Label) + '</td>';
+        rhtml += '<td class="fund">' + (r.period1Fund ? escapeHtml(r.period1Fund) : '<span style="color:var(--text-secondary);">—</span>') + '</td>';
+        rhtml += '<td>' + escapeHtml(r.period2Label) + '</td>';
+        rhtml += '<td class="fund">' + (r.period2Fund ? escapeHtml(r.period2Fund) : '<span style="color:var(--text-secondary);">—</span>') + '</td>';
+        rhtml += '</tr>';
       });
-      var csv = rows.map(function (r) { return r.join(','); }).join('\r\n');
-      var blob = new Blob([csv], { type: 'text/csv' });
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = 'student-roster.csv';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      rhtml += '</tbody></table></div>';
+      resultsDiv.innerHTML = rhtml;
+
+      document.getElementById('download-roster-csv').addEventListener('click', function () {
+        var rows = [['Name', 'Year', 'Email', 'Semester 1', 'Fund 1', 'Semester 2', 'Fund 2']];
+        filtered.forEach(function (r) {
+          rows.push([
+            csvCell(r.name),
+            csvCell(r.gradYear),
+            csvCell(r.email),
+            csvCell(r.period1Label),
+            csvCell(r.period1Fund),
+            csvCell(r.period2Label),
+            csvCell(r.period2Fund)
+          ]);
+        });
+        var csv = rows.map(function (r) { return r.join(','); }).join('\r\n');
+        var blob = new Blob([csv], { type: 'text/csv' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'student-roster.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
     });
   }
 
