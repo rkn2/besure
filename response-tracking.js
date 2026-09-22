@@ -398,7 +398,7 @@
       'Please note that you must wait until you are officially in the university system before starting any work. ' +
       'We need you to apply to the position so we can hire you on our end.\r\n\r\n' +
       'Please go to https://hr.psu.edu/careers and click on the Penn State Student box, then search by the following JOB/REQ number:\r\n\r\n' +
-      'REQ_0000072675 — Architectural Engineering - Part-Time BE-Sure Research Assistant\r\n\r\n' +
+      'REQ_0000082850 — Part-Time AE Research Scholars\r\n\r\n' +
       'Once you apply, please let Latrisha know so she can finish the hiring process on our end.\r\n\r\n' +
       'In terms of research mentoring and meetings, your faculty mentor is your primary contact. Some students meet weekly, others monthly, ' +
       'and some prefer quick check-ins via Teams. Have a conversation with your mentor about what works best for both of you and your project. ' +

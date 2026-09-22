@@ -97,7 +97,7 @@ If the folder permissions get reset (e.g., after re-creating the form), re-share
 - **To:** student
 - **CC:** Becca (rjn5308@psu.edu), PI, Latrisha (ldw5@psu.edu)
 - **Subject:** Welcome to the AE Research Scholars Program!
-- **Body:** Teams channel info, poster session, pay rate ($15/hr), HR application instructions (REQ_0000072675), tells student to let Latrisha know once they apply. Signed "Doc Nap."
+- **Body:** Teams channel info, poster session, pay rate ($15/hr), HR application instructions (REQ_0000082850), tells student to let Latrisha know once they apply. Signed "Doc Nap."
 
 ### Welcome email — returning student (on "Accepted", sent at the same time as payroll)
 - **From:** psuaeresearchscholars@gmail.com

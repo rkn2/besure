@@ -327,14 +327,14 @@ function processPendingOnboarding() {
         'Please note that you must wait until you are officially in the university system before starting any work. ' +
         'We need you to apply to the position so we can hire you on our end.\n\n' +
         'Please go to https://hr.psu.edu/careers and click on the Penn State Student box, then search by the following JOB/REQ number:\n\n' +
-        'REQ_0000072675 — Architectural Engineering - Part-Time BE-Sure Research Assistant\n\n' +
+        'REQ_0000082850 — Part-Time AE Research Scholars\n\n' +
         'Once you apply, please let Latrisha know so she can finish the hiring process on our end.';
       hiringHtml = '<p>The position pays $15/hour, and the average time commitment is about 5 hours per week, though some students work up to 10 hours. ' +
         'This is something you and your faculty mentor can decide together based on your project and schedule. ' +
         'Please note that you must wait until you are officially in the university system before starting any work. ' +
         'We need you to apply to the position so we can hire you on our end.</p>' +
         '<p>Please go to <a href="https://hr.psu.edu/careers">hr.psu.edu/careers</a> and click on the <strong>Penn State Student</strong> box, then search by the following JOB/REQ number:</p>' +
-        '<p style="margin:12px 0 12px 20px;font-size:15px"><strong>REQ_0000072675</strong> &mdash; Architectural Engineering - Part-Time BE-Sure Research Assistant</p>' +
+        '<p style="margin:12px 0 12px 20px;font-size:15px"><strong>REQ_0000082850</strong> &mdash; Part-Time AE Research Scholars</p>' +
         '<p>Once you apply, please let Latrisha know so she can finish the hiring process on our end.</p>';
     }
 
